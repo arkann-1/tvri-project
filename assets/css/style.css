@@ -46,7 +46,6 @@ body {
     background: #495057;
 }
 
-
 .menu-text {
     transition: opacity .18s ease;
 }
@@ -82,7 +81,7 @@ body {
     transition: margin-left .28s ease;
 }
 
-.sidebar.collapsed~.main {
+.sidebar.collapsed ~ .main {
     margin-left: var(--sb-narrow);
 }
 
@@ -92,7 +91,7 @@ mark {
     padding: 0 2px;
 }
 
-/* ====== TABLE CUSTOM ====== */
+/* Table*/
 .table {
     font-size: 14px;
 }

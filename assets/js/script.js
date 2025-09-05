@@ -98,7 +98,7 @@ function initFileButtons() {
 }
 
 // ======================================
-// Table Rendering (AJAX)
+// Table Rendering 
 // ======================================
 function loadTableData() {
     fetch("api.php")

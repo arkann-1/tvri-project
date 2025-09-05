@@ -97,19 +97,8 @@ function highlight_terms($text, $terms)
   <link rel="stylesheet" href="assets/css/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <style>
-    :root { --sb-wide: 220px; --sb-narrow: 72px; }
-    body { background-color: #f8f9fa; }
-    .sidebar{ height:100vh; background:linear-gradient(180deg,#052a6b,#031433); padding-top:1rem; position:fixed; top:0; left:0; width:var(--sb-wide); transition:width .28s ease; overflow:hidden; }
-    .sidebar a{ color:#fff; display:flex; align-items:center; gap:.65rem; padding:10px 16px; text-decoration:none; white-space:nowrap; }
-    .sidebar a:hover{ background:#495057; }
-    .menu-text{ transition:opacity .18s ease; }
-    .sidebar.collapsed .menu-text{ opacity:0; visibility:hidden; }
-    .pin-btn{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:1px solid rgba(255,255,255,.5); background:transparent; color:#fff; border-radius:8px; font-size:16px; }
-    .main{ margin-left:var(--sb-wide); padding:20px; transition:margin-left .28s ease; }
-    .sidebar.collapsed ~ .main{ margin-left:var(--sb-narrow); }
-  </style>
 </head>
+
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
