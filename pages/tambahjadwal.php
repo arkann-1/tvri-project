@@ -1,49 +1,73 @@
 <?php
-
 include '../config/koneksi.php';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tambah Jadwal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="m-0">➕ Tambah Jadwal</h4>
+    </div>
+    <div class="card-body">
+      <form action="proses_tambahjadwal.php" method="post" enctype="multipart/form-data">
+        
+        <div class="mb-3">
+          <label class="form-label">NIP</label>
+          <input type="text" name="nip" class="form-control" required>
+        </div>
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nip        = $conn->real_escape_string($_POST['nip']);
-    $nama       = $conn->real_escape_string($_POST['nama']);
-    $pekerjaan  = $conn->real_escape_string($_POST['pekerjaan']);
-    $tanggal    = $conn->real_escape_string($_POST['tanggal']);
-    // $jam_mulai  = $conn->real_escape_string($_POST['jam_mulai']);
-    // $jam_selesai = $conn->real_escape_string($_POST['jam_selesai']);
-    $shift      = $conn->real_escape_string($_POST['shift']);
-    $lokasi     = $conn->real_escape_string($_POST['lokasi']);
+        <div class="mb-3">
+          <label class="form-label">Nama</label>
+          <input type="text" name="nama" class="form-control" required>
+        </div>
 
-    // Tentukan jam berdasarkan shift
-    if ($shift == "1") {
-        $jam = "00:00 - 08:00";
-    } elseif ($shift == "2") {
-        $jam = "08:00 - 16:00";
-    } elseif ($shift == "3") {
-        $jam = "16:00 - 00:00";
-    } else {
-        $jam = "-";
-    }
+        <div class="mb-3">
+          <label class="form-label">Pekerjaan</label>
+          <input type="text" name="pekerjaan" class="form-control" required>
+        </div>
 
-    $filePath = null;
-    if (!empty($_FILES['file_path']['name'])) {
-        $uploadDir = "../uploads/";
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-        $filename = time() . "_" . basename($_FILES['file_path']['name']);
-        $targetFile = $uploadDir . $filename;
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Tanggal</label>
+            <input type="date" name="tanggal" class="form-control" required>
+          </div>
+        </div>
 
-        if (move_uploaded_file($_FILES['file_path']['tmp_name'], $targetFile)) {
-            $filePath = $targetFile;
-        }
-    }
+        <div class="mb-3">
+          <label class="form-label">Shift</label>
+          <select name="shift" class="form-select" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="1">Shift 1 (00.00 - 08.00)</option>
+            <option value="2">Shift 2 (08.00 - 16.00)</option>
+            <option value="3">Shift 3 (16.00 - 00.00)</option>
+          </select>
+        </div>
 
-    $sql = "INSERT INTO jadwal_karyawan (nip, nama, pekerjaan, tanggal, jam, shift, file_path, lokasi)
-            VALUES ('$nip','$nama','$pekerjaan','$tanggal','$jam','$shift','$filePath','$lokasi')";
+        <div class="mb-3">
+          <label class="form-label">Lokasi</label>
+          <select name="lokasi" class="form-select" required>
+            <option value="Senayan">Senayan</option>
+            <option value="Joglo">Joglo</option>
+          </select>
+        </div>
 
-    if ($conn->query($sql)) {
-        header("Location: jadwalbulanan.php?success=1");
-        exit;
-    } else {
-        echo "Error: " . $conn->error;
-    }
-}
+        <div class="mb-3">
+          <label class="form-label">Upload File (opsional)</label>
+          <input type="file" name="file_path" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Simpan</button>
+        <a href="jadwalbulanan.php" class="btn btn-secondary">↩️ Kembali</a>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
