@@ -38,23 +38,15 @@ include '../config/koneksi.php';
             <label class="form-label">Tanggal</label>
             <input type="date" name="tanggal" class="form-control" required>
           </div>
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Jam Mulai</label>
-            <input type="time" name="jam_mulai" class="form-control" required>
-          </div>
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Jam Selesai</label>
-            <input type="time" name="jam_selesai" class="form-control" required>
-          </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Shift</label>
           <select name="shift" class="form-select" required>
             <option value="">-- Pilih Shift --</option>
-            <option value="Pagi">Pagi</option>
-            <option value="Siang">Siang</option>
-            <option value="Malam">Malam</option>
+            <option value="1">Shift 1 (00.00 - 08.00)</option>
+            <option value="2">Shift 2 (08.00 - 16.00)</option>
+            <option value="3">Shift 3 (16.00 - 00.00)</option>
           </select>
         </div>
 
