@@ -8,13 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama       = $conn->real_escape_string($_POST['nama']);
     $pekerjaan  = $conn->real_escape_string($_POST['pekerjaan']);
     $tanggal    = $conn->real_escape_string($_POST['tanggal']);
-    $jam_mulai  = $conn->real_escape_string($_POST['jam_mulai']);
-    $jam_selesai = $conn->real_escape_string($_POST['jam_selesai']);
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
-
-    // gabungan jam mulai & selesai jadi satu string
-    $jam = $jam_mulai . ' - ' . $jam_selesai;
 
     // ambil data lama
     $oldData = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id=$id")->fetch_assoc();
@@ -38,9 +33,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    switch ($shift) {
+        case "1":
+            $jam = "00.00 - 08.00";
+            break;
+        case "2":
+            $jam = "08.00 - 16.00";
+            break;
+        case "3":
+            $jam = "16.00 - 00.00";
+            break;
+        default:
+            $jam = "";
+    }
+
+
     $sql = "UPDATE jadwal_karyawan 
             SET nip='$nip', nama='$nama', pekerjaan='$pekerjaan',
-                tanggal='$tanggal', jam='$jam', shift='$shift',
+                tanggal='$tanggal', shift='$shift', jam ='$jam',
                 file_path='$filePath', lokasi='$lokasi'
             WHERE id=$id";
 
@@ -51,3 +61,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Error: " . $conn->error;
     }
 }
+
