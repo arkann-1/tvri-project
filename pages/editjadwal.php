@@ -10,9 +10,12 @@ if (!$data) {
     die("Data tidak ditemukan.");
 }
 
-// Ambil daftar pegawai untuk dipilih
-$pegawai = $conn->query("SELECT id, nama, nip FROM pegawai");
-
+// pecah jam "HH:MM - HH:MM"
+$jam_mulai = "";
+$jam_selesai = "";
+if (!empty($data['jam']) && strpos($data['jam'], ' - ') !== false) {
+    list($jam_mulai, $jam_selesai) = explode(' - ', $data['jam']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -49,14 +52,24 @@ $pegawai = $conn->query("SELECT id, nama, nip FROM pegawai");
             <label class="form-label">Tanggal</label>
             <input type="date" name="tanggal" class="form-control" value="<?= $data['tanggal'] ?>" required>
           </div>
-          
           <div class="col-md-4 mb-3">
-            <label class="form-label">Shift</label>
-            <select name="shift" class="form-select" required>
-              <option value="1" <?= ($data['shift'] == "1" ? "selected" : "") ?>>Shift 1 (00.00 - 08.00)</option>
-              <option value="2" <?= ($data['shift'] == "2" ? "selected" : "") ?>>Shift 2 (08.00 - 16.00)</option>
-              <option value="3" <?= ($data['shift'] == "3" ? "selected" : "") ?>>Shift 3 (16.00 - 00.00)</option>
-            </select>
+            <label class="form-label">Jam Mulai</label>
+            <input type="time" name="jam_mulai" class="form-control" value="<?= $jam_mulai ?>" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Jam Selesai</label>
+            <input type="time" name="jam_selesai" class="form-control" value="<?= $jam_selesai ?>" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Shift</label>
+          <select name="shift" class="form-select" required>
+            <option value="Pagi" <?= ($data['shift'] == "Pagi" ? "selected" : "") ?>>Pagi</option>
+            <option value="Siang" <?= ($data['shift'] == "Siang" ? "selected" : "") ?>>Siang</option>
+            <option value="Malam" <?= ($data['shift'] == "Malam" ? "selected" : "") ?>>Malam</option>
+          </select>
+        </div>
 
         <div class="mb-3">
           <label class="form-label">Lokasi</label>

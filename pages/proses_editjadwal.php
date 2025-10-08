@@ -15,13 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
 
-    // Ambil file lama
-    $result = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id = $id");
-    $old_file = "";
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $old_file = $row['file_path'];
-    }
+    // gabungan jam mulai & selesai jadi satu string
+    $jam = $jam_mulai . ' - ' . $jam_selesai;
+
+    // ambil data lama
+    $oldData = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id=$id")->fetch_assoc();
+    $filePath = $oldData['file_path'];
 
     // Upload file baru (jika ada)
     if (!empty($_FILES['file_path']['name'])) {
@@ -61,11 +60,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $jam = "";
     }
 
+    switch ($shift) {
+        case "1":
+            $jam = "00.00 - 08.00";
+            break;
+        case "2":
+            $jam = "08.00 - 16.00";
+            break;
+        case "3":
+            $jam = "16.00 - 00.00";
+            break;
+        default:
+            $jam = "";
+    }
+
+
     // Update data
     $sql = "UPDATE jadwal_karyawan 
-        SET tanggal='$tanggal', shift='$shift', jam='$jam',
-            file_path='$filePath', lokasi='$lokasi'
-        WHERE id=$id";
+            SET nip='$nip', nama='$nama', pekerjaan='$pekerjaan',
+                tanggal='$tanggal', jam='$jam', shift='$shift',
+                file_path='$filePath', lokasi='$lokasi'
+            WHERE id=$id";
 
 
     if ($conn->query($sql)) {
@@ -75,4 +90,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Error: " . $conn->error;
     }
 }
-?>

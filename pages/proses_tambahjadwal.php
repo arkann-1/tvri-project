@@ -5,21 +5,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ambil data dari form
     $id_pegawai = $conn->real_escape_string($_POST['id_pegawai']);
     $tanggal    = $conn->real_escape_string($_POST['tanggal']);
+    $jam_mulai  = $conn->real_escape_string($_POST['jam_mulai']);
+    $jam_selesai = $conn->real_escape_string($_POST['jam_selesai']);
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
 
-    // Tentukan jam berdasarkan shift
-    if ($shift == "1") {
-        $jam = "00:00 - 08:00";
-    } elseif ($shift == "2") {
-        $jam = "08:00 - 16:00";
-    } elseif ($shift == "3") {
-        $jam = "16:00 - 00:00";
-    } else {
-        $jam = "-";
-    }
+    // gabungan jam mulai & selesai jadi satu string
+    $jam = $jam_mulai . ' - ' . $jam_selesai;
 
-    // Upload file (opsional)
     $filePath = null;
     if (!empty($_FILES['file_path']['name'])) {
         $uploadDir = "../uploads/";
