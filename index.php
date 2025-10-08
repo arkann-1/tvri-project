@@ -1,5 +1,6 @@
 <?php
 include 'config/koneksi.php';
+$queryError = false;
 
 // Ambil lokasi (default Senayan)
 $lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : 'Senayan';
@@ -42,18 +43,19 @@ if (!empty($searchTerms)) {
 }
 
 // Susun query akhir
+// Susun query akhir (pakai filter lokasi dan pencarian)
 $sql = "SELECT jk.*, p.nama 
         FROM jadwal_karyawan jk
-        LEFT JOIN pegawai p ON jk.id_pegawai = p.id
-        ORDER BY p.nama ASC";
-$result = $conn->query($sql);
+        LEFT JOIN pegawai p ON jk.id_pegawai = p.id";
+
+if (!empty($where)) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
+
+$sql .= " ORDER BY p.nama ASC";
 
 $result = $conn->query($sql);
-$queryError = false;
-if (!$result) {
-    error_log("SQL Error ({$conn->errno}): {$conn->error} — Query: {$sql}");
-    $queryError = true;
-}
+
 
 // Fungsi highlight
 function highlight_terms($text, $terms)
