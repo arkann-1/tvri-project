@@ -2,91 +2,60 @@
 include '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ambil ID dari form edit
-    $id         = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-    if ($id === 0) {
-        die("ID tidak ditemukan.");
-    }
-
-    // Ambil data dari form
+    $id         = intval($_POST['id']);
     $id_pegawai = $conn->real_escape_string($_POST['id_pegawai']);
-    $pekerjaan  = $conn->real_escape_string($_POST['pekerjaan']);
     $tanggal    = $conn->real_escape_string($_POST['tanggal']);
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
 
-    // gabungan jam mulai & selesai jadi satu string
-    $jam = $jam_mulai . ' - ' . $jam_selesai;
+    // 🔹 Tentukan jam otomatis berdasarkan shift
+    if ($shift == "1") {
+        $jam = "00:00 - 08:00";
+    } elseif ($shift == "2") {
+        $jam = "08:00 - 16:00";
+    } elseif ($shift == "3") {
+        $jam = "16:00 - 00:00";
+    } else {
+        $jam = "-";
+    }
 
-    // ambil data lama
-    $oldData = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id=$id")->fetch_assoc();
-    $filePath = $oldData['file_path'];
+    // 🔹 Ambil data lama untuk cek file
+    $result = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id = $id");
+    $oldData = $result->fetch_assoc();
+    $old_file = $oldData['file_path'] ?? '';
 
-    // Upload file baru (jika ada)
+    // 🔹 Proses file baru jika ada upload
+    $file_path = $old_file; // default: pakai file lama
     if (!empty($_FILES['file_path']['name'])) {
-        $uploadDir = "../uploads/";
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+        $target_dir = "../uploads/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
         }
 
-        $filename = time() . "_" . basename($_FILES['file_path']['name']);
-        $targetFile = $uploadDir . $filename;
-
-        if (move_uploaded_file($_FILES['file_path']['tmp_name'], $targetFile)) {
-            // Hapus file lama
-            if (!empty($old_file) && file_exists($old_file)) {
+        $new_file = $target_dir . basename($_FILES["file_path"]["name"]);
+        if (move_uploaded_file($_FILES["file_path"]["tmp_name"], $new_file)) {
+            // hapus file lama jika ada
+            if ($old_file && file_exists($old_file)) {
                 unlink($old_file);
             }
-            $filePath = $targetFile;
-        } else {
-            $filePath = $old_file;
+            $file_path = $new_file;
         }
-    } else {
-        $filePath = $old_file;
     }
 
-    // Tentukan jam
-    switch ($shift) {
-        case "1":
-            $jam = "00.00 - 08.00";
-            break;
-        case "2":
-            $jam = "08.00 - 16.00";
-            break;
-        case "3":
-            $jam = "16.00 - 00.00";
-            break;
-        default:
-            $jam = "";
-    }
-
-    switch ($shift) {
-        case "1":
-            $jam = "00.00 - 08.00";
-            break;
-        case "2":
-            $jam = "08.00 - 16.00";
-            break;
-        case "3":
-            $jam = "16.00 - 00.00";
-            break;
-        default:
-            $jam = "";
-    }
-
-
-    // Update data
+    // 🔹 Update data ke tabel jadwal_karyawan
     $sql = "UPDATE jadwal_karyawan 
-            SET nip='$nip', nama='$nama', pekerjaan='$pekerjaan',
-                tanggal='$tanggal', jam='$jam', shift='$shift',
-                file_path='$filePath', lokasi='$lokasi'
-            WHERE id=$id";
-
+            SET id_pegawai='$id_pegawai',
+                tanggal='$tanggal',
+                shift='$shift',
+                jam='$jam',
+                lokasi='$lokasi',
+                file_path='$file_path'
+            WHERE id='$id'";
 
     if ($conn->query($sql)) {
-        header("Location: jadwalbulanan.php?updated=1");
-        exit;
+        echo "<script>alert('Jadwal berhasil diperbarui!');window.location.href='jadwalbulanan.php';</script>";
     } else {
         echo "Error: " . $conn->error;
     }
 }
+?>

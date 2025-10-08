@@ -45,6 +45,7 @@ $pegawai = $conn->query("SELECT id, nama, nip FROM pegawai");
             <option value="2">Shift 2 (08.00 - 16.00)</option>
             <option value="3">Shift 3 (16.00 - 00.00)</option>
           </select>
+
         </div>
 
         <div class="mb-3">
