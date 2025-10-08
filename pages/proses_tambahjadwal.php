@@ -1,20 +1,25 @@
 <?php
-
 include '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nip        = $conn->real_escape_string($_POST['nip']);
-    $nama       = $conn->real_escape_string($_POST['nama']);
-    $pekerjaan  = $conn->real_escape_string($_POST['pekerjaan']);
+    // Ambil data dari form
+    $id_pegawai = $conn->real_escape_string($_POST['id_pegawai']);
     $tanggal    = $conn->real_escape_string($_POST['tanggal']);
-    $jam_mulai  = $conn->real_escape_string($_POST['jam_mulai']);
-    $jam_selesai = $conn->real_escape_string($_POST['jam_selesai']);
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
 
-    // gabungan jam mulai & selesai jadi satu string
-    $jam = $jam_mulai . ' - ' . $jam_selesai;
+    // Tentukan jam berdasarkan shift
+    if ($shift == "1") {
+        $jam = "00:00 - 08:00";
+    } elseif ($shift == "2") {
+        $jam = "08:00 - 16:00";
+    } elseif ($shift == "3") {
+        $jam = "16:00 - 00:00";
+    } else {
+        $jam = "-";
+    }
 
+    // Upload file (opsional)
     $filePath = null;
     if (!empty($_FILES['file_path']['name'])) {
         $uploadDir = "../uploads/";
@@ -29,8 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $sql = "INSERT INTO jadwal_karyawan (nip, nama, pekerjaan, tanggal, jam, shift, file_path, lokasi)
-            VALUES ('$nip','$nama','$pekerjaan','$tanggal','$jam','$shift','$filePath','$lokasi')";
+    // Query yang benar sesuai struktur tabel
+    $sql = "INSERT INTO jadwal_karyawan (id_pegawai, tanggal, jam, shift, file_path, lokasi)
+            VALUES ('$id_pegawai', '$tanggal', '$jam', '$shift', '$filePath', '$lokasi')";
 
     if ($conn->query($sql)) {
         header("Location: jadwalbulanan.php?success=1");
@@ -39,3 +45,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Error: " . $conn->error;
     }
 }
+?>

@@ -42,11 +42,11 @@ if (!empty($searchTerms)) {
 }
 
 // Susun query akhir
-$sql = "SELECT * FROM jadwal_karyawan";
-if (count($where) > 0) {
-    $sql .= " WHERE " . implode(" AND ", $where);
-}
-$sql .= " ORDER BY nama ASC";
+$sql = "SELECT jk.*, p.nama 
+        FROM jadwal_karyawan jk
+        LEFT JOIN pegawai p ON jk.id_pegawai = p.id
+        ORDER BY p.nama ASC";
+$result = $conn->query($sql);
 
 $result = $conn->query($sql);
 $queryError = false;
@@ -110,6 +110,7 @@ function highlight_terms($text, $terms)
     </div>
     <a href="index.php">🏠 <span class="menu-text">Beranda</span></a>
     <a href="pages/jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
+    <a href="pages/tambahpegawai.php">📅 <span class="menu-text">Tambah Pegawai</a>
     <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
   </aside>
 
@@ -166,12 +167,10 @@ function highlight_terms($text, $terms)
           <table class="table table-striped table-hover align-middle" id="scheduleTable">
             <thead class="table-dark">
               <tr>
-                <th>ID (NIP)</th>
                 <th>Nama</th>
                 <th>Tanggal</th>
                 <th>Shift</th>
                 <th>Jam</th>
-                <th>Pekerjaan</th>
                 <th>File</th>
                 <th>Lokasi</th>
               </tr>
@@ -188,12 +187,10 @@ function highlight_terms($text, $terms)
                           $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>Lihat File</a>";
                       }
                       echo "<tr>".
-                           "<td>".highlight_terms($row['nip'] ?? '', $searchTerms)."</td>".
                            "<td>".highlight_terms($row['nama'] ?? '', $searchTerms)."</td>".
                            "<td>".highlight_terms($row['tanggal'] ?? '', $searchTerms)."</td>".
                            "<td>".highlight_terms($shiftVal, $searchTerms)."</td>".
                            "<td>".highlight_terms($row['jam'] ?? '', $searchTerms)."</td>".
-                           "<td>".highlight_terms($row['pekerjaan'] ?? '', $searchTerms)."</td>".
                            "<td>".$fileHTML."</td>".
                            "<td>".highlight_terms($row['lokasi'] ?? '', $searchTerms)."</td>".
                            "</tr>";

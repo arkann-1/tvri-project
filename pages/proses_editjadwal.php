@@ -1,48 +1,72 @@
 <?php
-
 include '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id         = intval($_POST['id']);
-    $nip        = $conn->real_escape_string($_POST['nip']);
-    $nama       = $conn->real_escape_string($_POST['nama']);
+    // Ambil ID dari form edit
+    $id         = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    if ($id === 0) {
+        die("ID tidak ditemukan.");
+    }
+
+    // Ambil data dari form
+    $id_pegawai = $conn->real_escape_string($_POST['id_pegawai']);
     $pekerjaan  = $conn->real_escape_string($_POST['pekerjaan']);
     $tanggal    = $conn->real_escape_string($_POST['tanggal']);
-    $jam_mulai  = $conn->real_escape_string($_POST['jam_mulai']);
-    $jam_selesai = $conn->real_escape_string($_POST['jam_selesai']);
     $shift      = $conn->real_escape_string($_POST['shift']);
     $lokasi     = $conn->real_escape_string($_POST['lokasi']);
 
-    // gabungan jam mulai & selesai jadi satu string
-    $jam = $jam_mulai . ' - ' . $jam_selesai;
+    // Ambil file lama
+    $result = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id = $id");
+    $old_file = "";
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $old_file = $row['file_path'];
+    }
 
-    // ambil data lama
-    $oldData = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id=$id")->fetch_assoc();
-    $filePath = $oldData['file_path'];
-
-    // upload file baru
+    // Upload file baru (jika ada)
     if (!empty($_FILES['file_path']['name'])) {
         $uploadDir = "../uploads/";
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
+
         $filename = time() . "_" . basename($_FILES['file_path']['name']);
         $targetFile = $uploadDir . $filename;
 
         if (move_uploaded_file($_FILES['file_path']['tmp_name'], $targetFile)) {
-            // Hapus file lama jika ada
-            if ($filePath && file_exists($filePath)) {
-                unlink($filePath);
+            // Hapus file lama
+            if (!empty($old_file) && file_exists($old_file)) {
+                unlink($old_file);
             }
             $filePath = $targetFile;
+        } else {
+            $filePath = $old_file;
         }
+    } else {
+        $filePath = $old_file;
     }
 
+    // Tentukan jam
+    switch ($shift) {
+        case "1":
+            $jam = "00.00 - 08.00";
+            break;
+        case "2":
+            $jam = "08.00 - 16.00";
+            break;
+        case "3":
+            $jam = "16.00 - 00.00";
+            break;
+        default:
+            $jam = "";
+    }
+
+    // Update data
     $sql = "UPDATE jadwal_karyawan 
-            SET nip='$nip', nama='$nama', pekerjaan='$pekerjaan',
-                tanggal='$tanggal', jam='$jam', shift='$shift',
-                file_path='$filePath', lokasi='$lokasi'
-            WHERE id=$id";
+        SET tanggal='$tanggal', shift='$shift', jam='$jam',
+            file_path='$filePath', lokasi='$lokasi'
+        WHERE id=$id";
+
 
     if ($conn->query($sql)) {
         header("Location: jadwalbulanan.php?updated=1");
@@ -51,3 +75,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Error: " . $conn->error;
     }
 }
+?>

@@ -15,14 +15,14 @@ if ($search !== '') {
 }
 
 $where = [];
-$where[] = "MONTH(tanggal) = MONTH(CURDATE())";
-$where[] = "YEAR(tanggal) = YEAR(CURDATE())";
+$where[] = "MONTH(jk.tanggal) = MONTH(CURDATE())";
+$where[] = "YEAR(jk.tanggal) = YEAR(CURDATE())";
 
 if ($lokasi !== 'Semua') {
-    $where[] = "lokasi = '".$conn->real_escape_string($lokasi)."'";
+    $where[] = "jk.lokasi = '".$conn->real_escape_string($lokasi)."'";
 }
 if (!empty($searchTerms)) {
-    $cols = ['nip','nama','shift','jam','pekerjaan','lokasi'];
+    $cols = ['p.nip','p.nama','jk.shift','jk.jam','jk.lokasi'];
     foreach ($searchTerms as $t) {
         $tEsc = $conn->real_escape_string($t);
         $like = "%$tEsc%";
@@ -34,11 +34,15 @@ if (!empty($searchTerms)) {
     }
 }
 
-$sql = "SELECT * FROM jadwal_karyawan";
+$sql = "SELECT jk.*, p.nama AS nama_pegawai, p.nip AS nip_pegawai, d.divisi AS nama_divisi
+        FROM jadwal_karyawan jk
+        LEFT JOIN pegawai p ON jk.id_pegawai = p.id
+        LEFT JOIN divisi d ON p.id_divisi = d.ID";
+
 if (count($where)) {
     $sql .= " WHERE ".implode(" AND ", $where);
 }
-$sql .= " ORDER BY tanggal ASC, jam ASC"; // mengurutkan dari a - z
+$sql .= " ORDER BY jk.tanggal ASC, jk.jam ASC";
 
 $result = $conn->query($sql);
 
@@ -92,7 +96,7 @@ function highlight_terms($text, $terms)
       <input class="form-control me-2 flex-grow-1"
              name="search"
              type="text"
-             placeholder="Cari ID / Nama / Pekerjaan"
+             placeholder="Cari NIP / Nama / Shift / Jam"
              value="<?= htmlspecialchars($search, ENT_QUOTES, 'UTF-8') ?>">
 
       <select class="form-select me-2" style="width:150px;" name="lokasi" onchange="this.form.submit()">
@@ -116,9 +120,9 @@ function highlight_terms($text, $terms)
     <table class="table table-bordered table-striped align-middle">
       <thead class="table-dark">
         <tr>
-          <th>ID (NIP)</th>
+          <th>NIP</th>
           <th>Nama</th>
-          <th>Pekerjaan</th>
+          <th>Divisi</th>
           <th>Tanggal</th>
           <th>Jam</th>
           <th>Shift</th>
@@ -136,9 +140,9 @@ function highlight_terms($text, $terms)
                 }
                 ?>
                 <tr>
-          <td><?= highlight_terms($row['nip'], $searchTerms) ?></td>
-          <td><?= highlight_terms($row['nama'], $searchTerms) ?></td>
-          <td><?= highlight_terms($row['pekerjaan'], $searchTerms) ?></td>
+          <td><?= highlight_terms($row['nip_pegawai'], $searchTerms) ?></td>
+          <td><?= highlight_terms($row['nama_pegawai'], $searchTerms) ?></td>
+          <td><?= htmlspecialchars($row['nama_divisi']) ?></td>
           <td><?= highlight_terms($row['tanggal'], $searchTerms) ?></td>
           <td><?= highlight_terms($row['jam'], $searchTerms) ?></td>
           <td><?= highlight_terms($row['shift'], $searchTerms) ?></td>
