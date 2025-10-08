@@ -6,7 +6,7 @@ include '../config/koneksi.php';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Tambah Jadwal</title>
+  <title>Tambah Pegawai</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -29,9 +29,18 @@ include '../config/koneksi.php';
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Tim</label>
-          <input type="text" name="tim" class="form-control" required>
+          <label class="form-label">Divisi</label>
+          <select name="id_divisi" class="form-select" required>
+            <option value="">-- Pilih Divisi --</option>
+            <?php
+            $divisi = $conn->query("SELECT id, divisi FROM divisi");
+            while ($d = $divisi->fetch_assoc()):
+            ?>
+              <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['divisi']) ?></option>
+            <?php endwhile; ?>
+          </select>
         </div>
+
         <button type="submit" class="btn btn-success">💾 Simpan</button>
         <a href="daftarpegawai.php" class="btn btn-secondary">↩️ Kembali</a>
       </form>
