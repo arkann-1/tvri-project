@@ -112,7 +112,7 @@ function highlight_terms($text, $terms)
 <h2 class="fw-bold mb-3">📅 Jadwal Bulanan (Lokasi: <?= htmlspecialchars($lokasi) ?>)</h2>
 
 <div class="mb-3">
-  <a href="tambahjadwal.php" class="btn btn-success">➕ Tambah Jadwal</a>
+  <a href="tambahjadwal_otomatis.php" class="btn btn-success">➕ Tambah Jadwal</a>
 </div>
 
 <div class="card shadow">
