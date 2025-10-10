@@ -112,8 +112,9 @@ function highlight_terms($text, $terms)
     </div>
     <a href="index.php">🏠 <span class="menu-text">Beranda</span></a>
     <a href="pages/jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
-    <a href="pages/tambahpegawai.php">📅 <span class="menu-text">Tambah Pegawai</a>
     <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
+    <a href="pages/tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</a>
+    <a href="pages/tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</a>
   </aside>
 
   <!-- Main -->
