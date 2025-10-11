@@ -1,4 +1,5 @@
 <?php
+include '../config/session_check.php';
 include '../config/koneksi.php';
 
 $lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : 'Senayan';
@@ -85,6 +86,7 @@ function highlight_terms($text, $terms)
   <a href="rekap.php">✉️ <span class="menu-text">Rekap</span></a>
   <a href="tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</a>
   <a href="tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</a>
+  <a href="/tvri-project/auth/logout.php" class="mt-auto">⚠️ <span class="menu-text">Logout</span></a>
 </aside>
 
 <!-- Main -->
@@ -94,7 +96,7 @@ function highlight_terms($text, $terms)
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img src="../assets/images/TVRI.png" alt="TVRI" width="90" class="me-2">
     </a>
-    <form method="get" class="d-flex flex-grow-1 mx-3">
+    <form method="get" action="jadwalbulanan.php" class="d-flex flex-grow-1 mx-3">
       <input class="form-control me-2 flex-grow-1"
              name="search"
              type="text"
