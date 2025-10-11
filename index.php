@@ -169,12 +169,51 @@ function highlight_terms($text, $terms)
           <table class="table table-striped table-hover align-middle" id="scheduleTable">
             <thead class="table-dark">
               <tr>
-                <th>Nama</th>
+                <th>Nama Petugas</th>
                 <th>Tanggal</th>
                 <th>Shift</th>
                 <th>Jam</th>
-                <th>File</th>
                 <th>Lokasi</th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+              if ($result && $result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      $shiftVal = $row['shift'] ?? '';
+                      $fileHTML = "-";
+                      if (!empty($row['file_path'])) {
+                          $filename = basename(str_replace('\\', '/', $row['file_path']));
+                          $fileUrl = "uploads/" . $filename;
+                          $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>Lihat File</a>";
+                      }
+                      echo "<tr>".
+                           "<td>".highlight_terms($row['nama'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['tanggal'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($shiftVal, $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['jam'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['lokasi'] ?? '', $searchTerms)."</td>".
+                           "</tr>";
+                  }
+              } else {
+                  echo "<tr><td colspan='8' class='text-center'>⚠️ Tidak ada data</td></tr>";
+              }
+?>
+            </tbody>
+          </table>
+        </div>
+        <!-- Tabel Liputan -->
+         <div class="mb-3">
+             <a href="./pages/tambah_liputan.php" class="btn btn-success">➕ Tambah Kegiatan</a>
+        </div>
+         <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle" id="scheduleTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Nama Petugas</th>
+                <th>Lokasi</th>
+                <th>Jenis Kegiatan</th>
+                <th>Surat Tugas</th>
               </tr>
             </thead>
             <tbody>

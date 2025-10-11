@@ -1,32 +1,47 @@
 <?php
 include '../config/koneksi.php';
 
-$bulan = $_POST['bulan'];
-$lokasi = $_POST['lokasi'];
-$grup_A = $_POST['grup_A'] ?? [];
-$grup_B = $_POST['grup_B'] ?? [];
-$grup_C = $_POST['grup_C'] ?? [];
-$grup_D = $_POST['grup_D'] ?? [];
-
-$pola = ($lokasi==='Senayan') ? ['A','B','C','D'] : ['A','B','C'];
-$shift_map = ['A'=>1,'B'=>2,'C'=>3,'D'=>1];
-$jam_map = [1=>"00:00 - 08:00",2=>"08:00 - 16:00",3=>"16:00 - 00:00"];
-$jumlah_hari = date('t', strtotime("$bulan-01"));
-
-$all_groups = ['A'=>$grup_A,'B'=>$grup_B,'C'=>$grup_C];
-if($lokasi==='Senayan') $all_groups['D']=$grup_D;
-
-foreach($all_groups as $kode=>$list){
-  foreach($list as $id_peg){
-    for($d=1;$d<=$jumlah_hari;$d++){
-      $tanggal = sprintf("%s-%02d", $bulan, $d);
-      $shift = $shift_map[$pola[($d-1)%count($pola)]];
-      $jam = $jam_map[$shift];
-
-      $conn->query("INSERT INTO jadwal_karyawan (id_pegawai, tanggal, shift, jam, lokasi)
-                    VALUES ('$id_peg', '$tanggal', '$shift', '$jam', '$lokasi')");
-    }
-  }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Akses tidak valid.");
 }
 
-echo "<script>alert('Jadwal otomatis berhasil disimpan untuk $lokasi'); window.location='jadwalbulanan.php';</script>";
+$jadwalJson = $_POST['jadwalData'] ?? '';
+if (!$jadwalJson) {
+    die("Data jadwal kosong.");
+}
+$jadwalData = json_decode($jadwalJson, true);
+if (!is_array($jadwalData)) {
+    die("Format data jadwal tidak valid.");
+}
+
+$success = 0;
+$skip = 0;
+$fail = 0;
+
+foreach ($jadwalData as $j) {
+    $id_pegawai = intval($j['id_pegawai']);
+    $tanggal = $conn->real_escape_string($j['tanggal']);
+    $shift = intval($j['shift']);
+    $jam = $conn->real_escape_string($j['jam']);
+    $lokasi = $conn->real_escape_string($j['lokasi']);
+
+    // Cek duplikat: id_pegawai + tanggal + shift + lokasi
+    $cek = $conn->query("SELECT id FROM jadwal_karyawan WHERE id_pegawai=$id_pegawai AND tanggal='$tanggal' AND shift=$shift AND lokasi='$lokasi'");
+    if ($cek && $cek->num_rows > 0) {
+        $skip++;
+        continue;
+    }
+
+    $sql = "INSERT INTO jadwal_karyawan (id_pegawai, tanggal, shift, jam, lokasi)
+            VALUES ($id_pegawai, '$tanggal', $shift, '$jam', '$lokasi')";
+    if ($conn->query($sql)) $success++; else $fail++;
+}
+
+echo "<div style='padding:20px;font-family:Arial;'>";
+echo "<h4>Hasil Simpan Jadwal</h4>";
+echo "<p>Berhasil: <strong>$success</strong></p>";
+echo "<p>Lewat (sudah ada): <strong>$skip</strong></p>";
+echo "<p>Gagal: <strong>$fail</strong></p>";
+echo "<a href='jadwalbulanan.php' class='btn btn-primary'>Lihat Jadwal Bulanan</a> ";
+echo "<a href='tambahjadwal_otomatis.php' class='btn btn-secondary'>Kembali</a>";
+echo "</div>";
