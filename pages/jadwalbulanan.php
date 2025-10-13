@@ -94,7 +94,7 @@ function highlight_terms($text, $terms)
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img src="../assets/images/TVRI.png" alt="TVRI" width="90" class="me-2">
     </a>
-    <form method="get" class="d-flex flex-grow-1 mx-3">
+    <form method="get" action="jadwalbulanan.php" class="d-flex flex-grow-1 mx-3">
       <input class="form-control me-2 flex-grow-1"
              name="search"
              type="text"
