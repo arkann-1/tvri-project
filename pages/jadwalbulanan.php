@@ -83,6 +83,8 @@ function highlight_terms($text, $terms)
   <a href="../index.php">🏠 <span class="menu-text">Beranda</span></a>
   <a href="jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
   <a href="rekap.php">✉️ <span class="menu-text">Rekap</span></a>
+  <a href="tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</a>
+  <a href="tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</a>
 </aside>
 
 <!-- Main -->
@@ -110,10 +112,6 @@ function highlight_terms($text, $terms)
 </nav>
 
 <h2 class="fw-bold mb-3">📅 Jadwal Bulanan (Lokasi: <?= htmlspecialchars($lokasi) ?>)</h2>
-
-<div class="mb-3">
-  <a href="tambahjadwal_otomatis.php" class="btn btn-success">➕ Tambah Jadwal</a>
-</div>
 
 <div class="card shadow">
   <div class="card-body table-responsive">
