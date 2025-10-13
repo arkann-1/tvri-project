@@ -105,21 +105,7 @@ if (!$data) {
             <option value="Joglo" <?= ($data['lokasi'] == "Joglo" ? "selected" : "") ?>>Joglo</option>
           </select>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">File saat ini</label><br>
-          <?php if ($data['file_path']): ?>
-            <a href="<?= $data['file_path'] ?>" target="_blank">📂 Lihat File</a>
-          <?php else: ?>
-            <span class="text-muted">Belum ada file</span>
-          <?php endif; ?>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Upload File Baru (opsional)</label>
-          <input type="file" name="file_path" class="form-control">
-        </div>
-
+        
         <button type="submit" class="btn btn-primary">💾 Update</button>
         <a href="jadwalbulanan.php" class="btn btn-secondary">↩️ Kembali</a>
       </form>
