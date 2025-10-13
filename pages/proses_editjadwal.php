@@ -19,38 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $jam = "-";
     }
 
-    // 🔹 Ambil data lama untuk cek file
-    $result = $conn->query("SELECT file_path FROM jadwal_karyawan WHERE id = $id");
-    $oldData = $result->fetch_assoc();
-    $old_file = $oldData['file_path'] ?? '';
-
-    // 🔹 Proses file baru jika ada upload
-    $file_path = $old_file; // default: pakai file lama
-    if (!empty($_FILES['file_path']['name'])) {
-        $target_dir = "../uploads/";
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-
-        $new_file = $target_dir . basename($_FILES["file_path"]["name"]);
-        if (move_uploaded_file($_FILES["file_path"]["tmp_name"], $new_file)) {
-            // hapus file lama jika ada
-            if ($old_file && file_exists($old_file)) {
-                unlink($old_file);
-            }
-            $file_path = $new_file;
-        }
-    }
-
-    // 🔹 Update data ke tabel jadwal_karyawan
-    $sql = "UPDATE jadwal_karyawan 
-            SET id_pegawai='$id_pegawai',
-                tanggal='$tanggal',
-                shift='$shift',
-                jam='$jam',
-                lokasi='$lokasi',
-                file_path='$file_path'
-            WHERE id='$id'";
+    $sql = "UPDATE jadwal_karyawan SET 
+            id_pegawai = '$id_pegawai',
+            tanggal = '$tanggal',
+            shift = '$shift',
+            jam = '$jam',
+            lokasi = '$lokasi'
+            WHERE id = $id";
 
     if ($conn->query($sql)) {
         echo "<script>alert('Jadwal berhasil diperbarui!');window.location.href='jadwalbulanan.php';</script>";
