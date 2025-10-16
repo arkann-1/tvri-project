@@ -88,16 +88,6 @@ if (!$data) {
             </select>
           </div>
 
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Lokasi</label>
-            <select name="lokasi" class="form-select" required>
-              <option value="Senayan" <?= ($data['lokasi'] == "Senayan" ? "selected" : "") ?>>Senayan</option>
-              <option value="Joglo" <?= ($data['lokasi'] == "Joglo" ? "selected" : "") ?>>Joglo</option>
-            </select>
-          </div>
-        </div>
-
-
         <div class="mb-3">
           <label class="form-label">Lokasi</label>
           <select name="lokasi" class="form-select" required>
