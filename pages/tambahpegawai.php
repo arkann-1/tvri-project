@@ -70,7 +70,7 @@ while ($d = $divisi->fetch_assoc()):
         </div>
 
         <button type="submit" class="btn btn-success">💾 Simpan</button>
-        <a href="daftarpegawai.php" class="btn btn-secondary">↩️ Kembali</a>
+        <a href="index.php" class="btn btn-secondary">↩️ Kembali</a>
       </form>
     </div>
   </div>
