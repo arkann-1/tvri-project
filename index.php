@@ -214,33 +214,47 @@ function highlight_terms($text, $terms)
                 <th>Nama Petugas</th>
                 <th>Lokasi</th>
                 <th>Jenis Kegiatan</th>
+                <th>Tanggal</th>
                 <th>Surat Tugas</th>
               </tr>
             </thead>
+
             <tbody>
             <?php
-              if ($result && $result->num_rows > 0) {
-                  while ($row = $result->fetch_assoc()) {
-                      $shiftVal = $row['shift'] ?? '';
-                      $fileHTML = "-";
-                      if (!empty($row['file_path'])) {
-                          $filename = basename(str_replace('\\', '/', $row['file_path']));
-                          $fileUrl = "uploads/" . $filename;
-                          $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>Lihat File</a>";
-                      }
-                      echo "<tr>".
-                           "<td>".highlight_terms($row['nama'] ?? '', $searchTerms)."</td>".
-                           "<td>".highlight_terms($row['tanggal'] ?? '', $searchTerms)."</td>".
-                           "<td>".highlight_terms($shiftVal, $searchTerms)."</td>".
-                           "<td>".highlight_terms($row['jam'] ?? '', $searchTerms)."</td>".
-                           "<td>".$fileHTML."</td>".
-                           "<td>".highlight_terms($row['lokasi'] ?? '', $searchTerms)."</td>".
-                           "</tr>";
-                  }
-              } else {
-                  echo "<tr><td colspan='8' class='text-center'>⚠️ Tidak ada data</td></tr>";
-              }
-?>
+                include './config/koneksi.php';
+
+                // Ambil data dari tabel liputan
+                $result = $conn->query("SELECT nama_petugas, lokasi, jenis_kegiatan, tanggal, surat_tugas FROM liputan ORDER BY id DESC");
+
+                if ($result && $result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+
+                        // Siapkan tombol file (jika ada surat tugas)
+                        $fileHTML = "-";
+                        if (!empty($row['surat_tugas'])) {
+                            // Ambil nama file dari path
+                            $filename = basename(str_replace('\\', '/', $row['surat_tugas']));
+                            // Path relatif (karena file disimpan di ../uploads)
+                            $fileUrl = "uploads/" . $filename;
+                            $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>📄 Lihat</a>";
+                        }
+
+                        echo "<tr>
+                                <td>" . htmlspecialchars($row['nama_petugas']) . "</td>
+                                <td>" . htmlspecialchars($row['lokasi']) . "</td>
+                                <td>" . htmlspecialchars($row['jenis_kegiatan']) . "</td>
+                                <td>" . htmlspecialchars($row['tanggal']) . "</td>
+                                <td>" . $fileHTML . "</td>
+                              </tr>";
+
+                    }
+                } else {
+                    echo "<tr><td colspan='4' class='text-center'>⚠️ Tidak ada data liputan</td></tr>";
+                }
+
+                $conn->close();
+                ?>
+
             </tbody>
           </table>
         </div>
