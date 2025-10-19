@@ -224,7 +224,18 @@ function highlight_terms($text, $terms)
                 include './config/koneksi.php';
 
                 // Ambil data dari tabel liputan
-                $result = $conn->query("SELECT nama_petugas, lokasi, jenis_kegiatan, tanggal, surat_tugas FROM liputan ORDER BY id DESC");
+                $result = $conn->query("
+                                          SELECT 
+                                              p.nama AS nama_petugas,
+                                              l.lokasi,
+                                              l.jenis_kegiatan,
+                                              l.tanggal,
+                                              l.surat_tugas
+                                          FROM liputan l
+                                          JOIN pegawai p ON l.id_pegawai = p.id
+                                          ORDER BY l.id DESC
+                                        ");
+
 
                 if ($result && $result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
