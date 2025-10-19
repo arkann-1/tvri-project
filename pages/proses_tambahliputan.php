@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tanggal        = $conn->real_escape_string($_POST['tanggal']);
     $lokasi         = $conn->real_escape_string($_POST['lokasi']);
     $jenis_kegiatan = $conn->real_escape_string($_POST['jenis_kegiatan']);
-    $nama_petugas   = '';
 
     // ==== Ambil nama pegawai dari tabel pegawai ====
     $result = $conn->query("SELECT nama FROM pegawai WHERE id = $id_pegawai LIMIT 1");
@@ -56,17 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($surat_tugas === null) {
         // Jika tidak ada file, masukkan NULL untuk kolom surat_tugas
         $stmt = $conn->prepare("
-            INSERT INTO liputan (nama_petugas, tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
-            VALUES (?, ?, ?, ?, NULL, ?)
+            INSERT INTO liputan (tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
+            VALUES (?, ?, ?, NULL, ?)
         ");
-        $stmt->bind_param("ssssi", $nama_petugas, $tanggal, $lokasi, $jenis_kegiatan, $id_pegawai);
+        $stmt->bind_param("sssi", $tanggal, $lokasi, $jenis_kegiatan, $id_pegawai);
+
     } else {
         // Jika ada file, masukkan path-nya
         $stmt = $conn->prepare("
-            INSERT INTO liputan (nama_petugas, tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO liputan (tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
+            VALUES (?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("sssssi", $nama_petugas, $tanggal, $lokasi, $jenis_kegiatan, $surat_tugas, $id_pegawai);
+        $stmt->bind_param("ssssi", $tanggal, $lokasi, $jenis_kegiatan, $surat_tugas, $id_pegawai);
+
     }
 
     if ($stmt->execute()) {
