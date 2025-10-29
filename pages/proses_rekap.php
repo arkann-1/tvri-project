@@ -16,8 +16,10 @@ $sql = "
         p.nama AS nama_pegawai,
         COUNT(DISTINCT j.id) AS total_hari_kerja,
         COUNT(DISTINCT l.id) AS total_liputan,
-        GROUP_CONCAT(DISTINCT l.jenis_kegiatan SEPARATOR ', ') AS nama_liputan,
-        GROUP_CONCAT(DISTINCT l.lokasi SEPARATOR ', ') AS lokasi_liputan
+        GROUP_CONCAT(
+            DISTINCT CONCAT(l.jenis_kegiatan, ' - ', l.lokasi)
+            SEPARATOR '\n'
+        ) AS liputan_detail
     FROM pegawai p
     LEFT JOIN jadwal_karyawan j 
         ON p.id = j.id_pegawai 
@@ -30,6 +32,7 @@ $sql = "
     HAVING total_hari_kerja > 0
     ORDER BY p.nama ASC
 ";
+
 
 $result = $conn->query($sql);
 ?>
@@ -50,7 +53,6 @@ $result = $conn->query($sql);
                         <th>Total Hari Kerja</th>
                         <th>Jumlah Liputan</th>
                         <th>Nama Liputan</th>
-                        <th>Lokasi Liputan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,8 +65,7 @@ $result = $conn->query($sql);
                             <td><?= htmlspecialchars($row['nama_pegawai']); ?></td>
                             <td class="text-center"><?= (int)$row['total_hari_kerja']; ?></td>
                             <td class="text-center"><?= (int)$row['total_liputan']; ?></td>
-                            <td><?= htmlspecialchars($row['nama_liputan'] ?: '-'); ?></td>
-                            <td><?= htmlspecialchars($row['lokasi_liputan'] ?: '-'); ?></td>
+                            <td><?= nl2br(htmlspecialchars($row['liputan_detail'] ?: '-')); ?></td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
