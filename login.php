@@ -1,10 +1,36 @@
 <?php
-session_start();
+// login.php
+require_once 'auth.php';
 
-// Jika sudah login, langsung arahkan ke index
-if (isset($_SESSION['username'])) {
-    header("Location: index.php");
-    exit();
+// Jika sudah login, langsung ke index
+if (is_logged_in()) {
+    header('Location: /index.php');
+    exit;
+}
+
+$error = '';
+
+// Proses form login
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    // TODO: ganti bagian ini dengan pengecekan dari database (prepared statements)
+    // Contoh sederhana (JANGAN PAKAI untuk credential nyata):
+    if ($username === 'admin' && $password === 'secret') {
+        // Keamanan: regenerasi session id setelah login
+        session_regenerate_id(true);
+        $_SESSION['logged_in'] = true;
+        $_SESSION['username'] = $username;
+
+        // Redirect ke halaman yang diminta sebelumnya jika ada
+        $redirect = $_SESSION['redirect_after_login'] ?? '/index.php';
+        unset($_SESSION['redirect_after_login']);
+        header('Location: ' . $redirect);
+        exit;
+    } else {
+        $error = 'Username atau password salah.';
+    }
 }
 ?>
 

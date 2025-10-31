@@ -1,5 +1,8 @@
 <?php
 include 'config/koneksi.php';
+require_once 'auth.php';
+require_login();
+
 $queryError = false;
 
 // Ambil lokasi (default Senayan)
