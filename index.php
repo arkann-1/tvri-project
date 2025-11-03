@@ -1,9 +1,12 @@
 <?php
+
+session_start();
 include 'config/koneksi.php';
-require_once 'auth.php';
-require_login();
+$loggedIn = isset($_SESSION['user']);
+$role = $loggedIn ? $_SESSION['user']['role'] : null;
 
 $queryError = false;
+
 
 // Ambil lokasi (default Senayan)
 $lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : 'Senayan';
@@ -106,19 +109,26 @@ function highlight_terms($text, $terms)
 
 <body>
   <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="d-flex align-items-center justify-content-between px-3 mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <button id="pinSidebar" class="pin-btn" title="Collapse/Expand">📌</button>
-        <h4 class="m-0 ms-3 text-light">MENU</h4>
-      </div>
+<aside class="sidebar" id="sidebar">
+  <div class="d-flex align-items-center justify-content-between px-3 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <button id="pinSidebar" class="pin-btn" title="Collapse/Expand">📌</button>
+      <h4 class="m-0 ms-3 text-light">MENU</h4>
     </div>
-    <a href="index.php">🏠 <span class="menu-text">Beranda</span></a>
-    <a href="pages/jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
-    <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
-    <a href="pages/tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</a>
-    <a href="pages/tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</a>
-  </aside>
+  </div>
+  <a href="index.php">🏠 <span class="menu-text">Beranda</span></a>
+  <a href="pages/jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
+  <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
+
+  <?php if ($loggedIn): ?>
+      <a href="pages/tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</span></a>
+      <a href="pages/tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</span></a>
+      <a href="logout.php" class="text-danger">🚪 <span class="menu-text">Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</span></a>
+  <?php else: ?>
+      <a href="login.php" class="text-success">🔑 <span class="menu-text">Login</span></a>
+  <?php endif; ?>
+</aside>
+
 
   <!-- Main -->
   <main class="main">
@@ -207,8 +217,12 @@ function highlight_terms($text, $terms)
           </table>
         </div>
         <!-- Tabel Liputan -->
-         <div class="mb-3">
-             <a href="./pages/tambah_liputan.php" class="btn btn-success">➕ Tambah Kegiatan</a>
+         <?php if ($loggedIn): ?>
+            <div class="mb-3">
+                <a href="./pages/tambah_liputan.php" class="btn btn-success">➕ Tambah Kegiatan</a>
+            </div>
+          <?php endif; ?>
+
         </div>
          <div class="table-responsive">
           <table class="table table-striped table-hover align-middle" id="scheduleTable">

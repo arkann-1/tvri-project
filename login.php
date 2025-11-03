@@ -1,35 +1,30 @@
 <?php
-// login.php
-require_once 'auth.php';
-
-// Jika sudah login, langsung ke index
-if (is_logged_in()) {
-    header('Location: /index.php');
-    exit;
-}
+session_start();
+include 'config/koneksi.php';
 
 $error = '';
 
-// Proses form login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $username = $conn->real_escape_string($_POST['username']);
+    $password = $_POST['password'];
 
-    // TODO: ganti bagian ini dengan pengecekan dari database (prepared statements)
-    // Contoh sederhana (JANGAN PAKAI untuk credential nyata):
-    if ($username === 'admin' && $password === 'secret') {
-        // Keamanan: regenerasi session id setelah login
-        session_regenerate_id(true);
-        $_SESSION['logged_in'] = true;
-        $_SESSION['username'] = $username;
+    $result = $conn->query("SELECT * FROM users WHERE username = '$username' LIMIT 1");
+    if ($result && $result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'username' => $user['username'],
+                'role' => $user['role']  // tambahkan ini
+            ];
+            header('Location: index.php');
+            exit;
 
-        // Redirect ke halaman yang diminta sebelumnya jika ada
-        $redirect = $_SESSION['redirect_after_login'] ?? '/index.php';
-        unset($_SESSION['redirect_after_login']);
-        header('Location: ' . $redirect);
-        exit;
+        } else {
+            $error = 'Password salah!';
+        }
     } else {
-        $error = 'Username atau password salah.';
+        $error = 'Username tidak ditemukan!';
     }
 }
 ?>
@@ -37,30 +32,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Login Pegawai</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <title>Login Sistem Jadwal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light d-flex justify-content-center align-items-center vh-100">
-
-<div class="card shadow p-4" style="width: 400px;">
-    <h4 class="text-center mb-4">Login Pegawai</h4>
-    <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+  <div class="card p-4 shadow" style="width: 350px;">
+    <h4 class="text-center mb-3">🔒 Login</h4>
+    <?php if ($error): ?>
+      <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
-
-    <form action="proses_login.php" method="POST">
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" id="username" class="form-control" required autofocus>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" id="password" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-success w-100">Login</button>
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <button class="btn btn-primary w-100" type="submit">Masuk</button>
     </form>
-</div>
-
+  </div>
 </body>
 </html>
