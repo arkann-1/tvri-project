@@ -21,29 +21,62 @@ body {
 
 /* Sidebar */
 .sidebar {
-    height: 100vh;
-    background: linear-gradient(180deg, var(--navy), #031433);
-    padding-top: 1rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sb-wide);
-    transition: width .28s ease;
-    overflow: hidden;
+  width: 240px;
+  background: #053D7A;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding-top: 10px;
+  overflow-y: auto;
+  transition: .3s;
 }
 
 .sidebar a {
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: .65rem;
-    padding: 10px 16px;
-    text-decoration: none;
-    white-space: nowrap;
+  display: block;
+  padding: 12px;
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
 }
 
 .sidebar a:hover {
-    background: #495057;
+  background: rgba(255,255,255,0.2);
+}
+
+/* Main content */
+.main {
+  margin-left: 250px;
+  padding: 15px;
+}
+
+/* Mobile Sidebar */
+@media(max-width:768px){
+  .sidebar { left: -260px; }
+  .sidebar.show { left: 0; }
+
+  .main {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .searchForm {
+    flex-direction: column !important;
+  }
+
+  .searchForm input, .searchForm select, .searchForm button {
+    width: 100%;
+  }
+}
+
+/* Table scroll */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Logo resize */
+.navbar img {
+  width: 70px;
 }
 
 .menu-text {
