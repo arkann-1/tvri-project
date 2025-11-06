@@ -15,16 +15,18 @@ $grup_D = $_POST['grup_D'] ?? [];
 // Jumlah hari di bulan tersebut
 $jumlah_hari = date('t', strtotime("$bulan-01"));
 
-// Pola per shift bergantung lokasi
-if ($lokasi === 'Senayan') {
-    $pola_shift1 = ['C','D','A','B'];
-    $pola_shift2 = ['B','C','D','A'];
-    $pola_shift3 = ['D','A','B','C'];
-} else { // Joglo (3 grup)
-    $pola_shift1 = ['A','B','C'];
-    $pola_shift2 = ['C','A','B'];
-    $pola_shift3 = ['B','C','A'];
+// Ambil pola shift dari input user
+$pola_shift1 = str_split(strtoupper($_POST['pola_shift1']));
+$pola_shift2 = str_split(strtoupper($_POST['pola_shift2']));
+$pola_shift3 = str_split(strtoupper($_POST['pola_shift3']));
+
+// Validasi jika Joglo (tidak boleh ada D)
+if ($lokasi === 'Joglo') {
+    $pola_shift1 = array_filter($pola_shift1, fn($g) => in_array($g, ['A','B','C']));
+    $pola_shift2 = array_filter($pola_shift2, fn($g) => in_array($g, ['A','B','C']));
+    $pola_shift3 = array_filter($pola_shift3, fn($g) => in_array($g, ['A','B','C']));
 }
+
 
 // Jam per shift
 $jam_map = [
@@ -164,6 +166,11 @@ for ($d = 1; $d <= $jumlah_hari; $d++) {
             foreach ($all_groups[$g] as $id): ?>
               <input type="hidden" name="grup_<?= $g ?>[]" value="<?= intval($id) ?>">
         <?php endforeach; endforeach; ?>
+
+        <input type="hidden" name="pola_shift1" value="<?= htmlspecialchars($_POST['pola_shift1']) ?>">
+        <input type="hidden" name="pola_shift2" value="<?= htmlspecialchars($_POST['pola_shift2']) ?>">
+        <input type="hidden" name="pola_shift3" value="<?= htmlspecialchars($_POST['pola_shift3']) ?>">
+
 
         <!-- input jadwalData (JSON) -->
         <input type="hidden" name="jadwalData" value="<?= htmlspecialchars(json_encode($jadwalData), ENT_QUOTES) ?>">

@@ -78,6 +78,27 @@ foreach ($grup as $g):
           </div>
           <?php endforeach; ?>
         </div>
+        
+        <hr class="my-4">
+
+          <h5 class="mb-3">Pola Shift (isi urutan grup, contoh: DABC / CDAB / ABCD)</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Shift 1</label>
+              <input type="text" name="pola_shift1" class="form-control" placeholder="misal: DABC" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Shift 2</label>
+              <input type="text" name="pola_shift2" class="form-control" placeholder="misal: CDAB" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Shift 3</label>
+              <input type="text" name="pola_shift3" class="form-control" placeholder="misal: ABCD" required>
+            </div>
+          </div>
+
+          <hr class="my-4">
 
         <button type="submit" class="btn btn-success">🔍 Lihat Pratinjau Jadwal</button>
       </form>

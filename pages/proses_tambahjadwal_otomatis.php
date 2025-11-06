@@ -2,51 +2,36 @@
 include '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $bulan = $_POST['bulan']; // format YYYY-MM
+    $bulan = $_POST['bulan'];
     $lokasi = $_POST['lokasi'];
-    $grup_A = $_POST['grup_A'] ?? [];
-    $grup_B = $_POST['grup_B'] ?? [];
-    $grup_C = $_POST['grup_C'] ?? [];
-    $grup_D = $_POST['grup_D'] ?? [];
 
-    // Tentukan pola berdasarkan lokasi
-    if ($lokasi === 'Senayan') {
-        $pola = [
-            ['A','B','C','D'],
-            ['B','C','D','A'],
-            ['C','D','A','B'],
-            ['D','A','B','C']
-        ];
-        $jumlah_grup = 4;
-    } else { // Joglo
-        $pola = [
-            ['A','B','C'],
-            ['C','A','B'],
-            ['B','C','A'],
-            ['A','B','C']
-        ];
-        $jumlah_grup = 3;
-    }
+    // Ambil input grup lalu ubah ke array
+    $grup_A = array_filter(explode(",", $_POST['grup_A'] ?? ''));
+    $grup_B = array_filter(explode(",", $_POST['grup_B'] ?? ''));
+    $grup_C = array_filter(explode(",", $_POST['grup_C'] ?? ''));
+    $grup_D = array_filter(explode(",", $_POST['grup_D'] ?? ''));
 
-    // Tentukan shift
-    $shift_map = [
-        'A' => 1,
-        'B' => 2,
-        'C' => 3,
-        'D' => 1
+    // Ambil pola input user per minggu
+    $pola = [
+        explode(",", $_POST['pola_m1']),
+        explode(",", $_POST['pola_m2']),
+        explode(",", $_POST['pola_m3']),
+        explode(",", $_POST['pola_m4'])
     ];
 
-    // Tentukan jumlah minggu (anggap 4 minggu)
+    // Mapping shift
+    $shift_map = ['A'=>1,'B'=>2,'C'=>3,'D'=>1];
+
+    // Generate jadwal 4 minggu
     for ($minggu = 0; $minggu < 4; $minggu++) {
         $awal_minggu = date("Y-m-d", strtotime("$bulan-01 +$minggu week"));
 
-        foreach ($pola[$minggu] as $idx => $group) {
-            // Ambil daftar pegawai dari grup
+        foreach ($pola[$minggu] as $group) {
             $list_pegawai = ${"grup_" . $group};
 
             foreach ($list_pegawai as $id_pegawai) {
-                $tanggal = $awal_minggu;
-                $shift = $shift_map[$group];
+                $shift = $shift_map[$group] ?? null;
+
                 $jam = match($shift) {
                     1 => "00:00 - 08:00",
                     2 => "08:00 - 16:00",
@@ -54,13 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     default => "-"
                 };
 
-                // Simpan ke database
                 $conn->query("INSERT INTO jadwal_karyawan (id_pegawai, tanggal, shift, jam, lokasi) 
-                              VALUES ('$id_pegawai', '$tanggal', '$shift', '$jam', '$lokasi')");
+                              VALUES ('$id_pegawai', '$awal_minggu', '$shift', '$jam', '$lokasi')");
             }
         }
     }
 
-    echo "<script>alert('Jadwal otomatis berhasil dibuat untuk lokasi $lokasi!'); window.location='jadwalbulanan.php';</script>";
+    echo "<script>alert('Jadwal dibuat berdasarkan input pola!'); window.location='jadwalbulanan.php';</script>";
 }
+
 ?>
