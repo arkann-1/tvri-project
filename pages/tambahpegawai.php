@@ -1,5 +1,8 @@
 <?php
+$requireAdmin = true;  // hanya admin yang bisa akses halaman ini
+include '../auth_check.php';
 include '../config/koneksi.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="id">

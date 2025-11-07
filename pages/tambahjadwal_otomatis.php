@@ -1,4 +1,6 @@
 <?php
+$requireAdmin = true;  // hanya admin yang bisa akses halaman ini
+include '../auth_check.php';
 include '../config/koneksi.php';
 $pegawai = $conn->query("SELECT id, nama FROM pegawai ORDER BY nama ASC");
 ?>

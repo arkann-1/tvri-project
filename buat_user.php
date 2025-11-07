@@ -1,10 +1,22 @@
 <?php
-include 'config/koneksi.php';
+include "config/koneksi.php";
 
-$username = 'admin';
-$password_plain = '12345';
-$hashed = password_hash($password_plain, PASSWORD_DEFAULT);
+$default_pass = password_hash("GantiSaya!123", PASSWORD_DEFAULT);
 
-$conn->query("INSERT INTO users (username, password) VALUES ('$username', '$hashed')");
+$sql = "
+INSERT INTO users (username, password, role, pegawai_id)
+SELECT 
+    p.nip,
+    '$default_pass',
+    'petugas',
+    p.id
+FROM pegawai p
+LEFT JOIN users u ON p.id = u.pegawai_id
+WHERE u.pegawai_id IS NULL;
+";
 
-echo "User $username berhasil dibuat dengan password: $password_plain";
+if ($conn->query($sql)) {
+    echo "✅ User berhasil dibuat dengan password bcrypt.";
+} else {
+    echo "❌ Error: " . $conn->error;
+}

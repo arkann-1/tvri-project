@@ -121,10 +121,16 @@ function highlight_terms($text, $terms)
   <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
 
   <?php if ($loggedIn): ?>
+
+    <?php if ($role === 'admin'): ?>
       <a href="pages/tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</span></a>
       <a href="pages/tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</span></a>
-      <a href="logout.php" class="text-danger">🚪 <span class="menu-text">Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</span></a>
+    <?php endif; ?> 
+
+    <a href="logout.php" class="text-danger">🚪 <span class="menu-text">Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</span></a>
+
   <?php else: ?>
+
       <a href="login.php" class="text-success">🔑 <span class="menu-text">Login</span></a>
   <?php endif; ?>
 </aside>
@@ -135,16 +141,9 @@ function highlight_terms($text, $terms)
     <!-- Topbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded mb-4">
       <div class="container-fluid">
-
-        <!-- Button for mobile menu -->
-        <button class="btn btn-outline-primary d-lg-none me-2" id="toggleSidebar">
-          ☰
-        </button>
-
         <a class="navbar-brand d-flex align-items-center" href="#">
           <img src="assets/images/TVRI.png" alt="TVRI" width="90" class="me-2">
         </a>
-
         <form method="get" class="d-flex flex-grow-1 mx-3">
           <input class="form-control me-2 flex-grow-1"
                  id="searchInput"
@@ -225,10 +224,12 @@ function highlight_terms($text, $terms)
         </div>
         <!-- Tabel Liputan -->
          <?php if ($loggedIn): ?>
+          <?php if ($role === 'admin'): ?>
             <div class="mb-3">
                 <a href="./pages/tambah_liputan.php" class="btn btn-success">➕ Tambah Kegiatan</a>
             </div>
           <?php endif; ?>
+        <?php endif; ?>
 
         </div>
          <div class="table-responsive">
@@ -298,6 +299,5 @@ function highlight_terms($text, $terms)
   </main>
 
   <script src="assets/js/script.js"></script>
-  
 </body>
 </html>
