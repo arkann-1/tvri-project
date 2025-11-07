@@ -140,13 +140,6 @@ function loadTableData() {
 // ======================================
 // Initialize
 // ======================================
-document.addEventListener("DOMContentLoaded", function () {
-  const btn = document.getElementById("toggleSidebarBtn");
-  const sidebar = document.getElementById("sidebar");
-
-  if (btn) {
-    btn.addEventListener("click", () => {
-      sidebar.classList.toggle("show");
-    });
-  }
+document.addEventListener("DOMContentLoaded", () => {
+    loadTableData();
 });

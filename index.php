@@ -102,143 +102,202 @@ function highlight_terms($text, $terms)
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Jadwal Hari Ini — Sistem Jadwal</title>
-
   <link rel="stylesheet" href="assets/css/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
-
-<!-- Sidebar -->
+  <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-  <div class="px-3 my-3 text-light fw-bold">MENU</div>
-
+  <div class="d-flex align-items-center justify-content-between px-3 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <button id="pinSidebar" class="pin-btn" title="Collapse/Expand">📌</button>
+      <h4 class="m-0 ms-3 text-light">MENU</h4>
+    </div>
+  </div>
   <a href="index.php">🏠 <span class="menu-text">Beranda</span></a>
   <a href="pages/jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
-  <a href="pages/rekap.php">📨 <span class="menu-text">Rekap</span></a>
+  <a href="pages/rekap.php">✉️ <span class="menu-text">Rekap</span></a>
 
   <?php if ($loggedIn): ?>
-      <a href="pages/tambahpegawai.php">👤 Tambah Pegawai</a>
-      <a href="pages/tambahjadwal_otomatis.php">📂 Tambah Jadwal</a>
-      <a href="logout.php" class="text-danger">🚪 Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</a>
+      <a href="pages/tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</span></a>
+      <a href="pages/tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</span></a>
+      <a href="logout.php" class="text-danger">🚪 <span class="menu-text">Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</span></a>
   <?php else: ?>
-      <a href="login.php" class="text-success">🔑 Login</a>
+      <a href="login.php" class="text-success">🔑 <span class="menu-text">Login</span></a>
   <?php endif; ?>
 </aside>
 
-<!-- Main Content -->
-<main class="main">
 
-<nav class="navbar navbar-light bg-white shadow-sm px-3 mb-3">
-    <div class="d-flex align-items-center w-100">
+  <!-- Main -->
+  <main class="main">
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded mb-4">
+      <div class="container-fluid">
 
-      <!-- Mobile Sidebar Button -->
-      <button class="btn btn-outline-primary d-lg-none me-2" id="toggleSidebarBtn">☰</button>
+        <!-- Button for mobile menu -->
+        <button class="btn btn-outline-primary d-lg-none me-2" id="toggleSidebar">
+          ☰
+        </button>
 
-      <img src="assets/images/TVRI.png" width="80" class="me-2">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <img src="assets/images/TVRI.png" alt="TVRI" width="90" class="me-2">
+        </a>
 
-      <form method="get" class="d-flex flex-grow-1 gap-2 ms-3 searchForm">
-        <input class="form-control" name="search" placeholder="Cari ID / Nama / Pekerjaan"
-               value="<?= htmlspecialchars($search) ?>">
+        <form method="get" class="d-flex flex-grow-1 mx-3">
+          <input class="form-control me-2 flex-grow-1"
+                 id="searchInput"
+                 name="search"
+                 type="text"
+                 placeholder="Cari ID / Nama / Pekerjaan"
+                 value="<?= htmlspecialchars($search, ENT_QUOTES, 'UTF-8') ?>">
 
-        <select class="form-select" name="lokasi" onchange="this.form.submit()">
-          <option value="Senayan" <?= $lokasi === 'Senayan' ? 'selected' : '' ?>>Senayan</option>
-          <option value="Joglo"   <?= $lokasi === 'Joglo' ? 'selected' : '' ?>>Joglo</option>
-          <option value="Semua"   <?= $lokasi === 'Semua' ? 'selected' : '' ?>>Semua</option>
-        </select>
+          <select class="form-select me-2" style="width:150px;" name="lokasi" onchange="this.form.submit()">
+            <option value="Senayan" <?= $lokasi === 'Senayan' ? 'selected' : ''; ?>>Senayan</option>
+            <option value="Joglo"   <?= $lokasi === 'Joglo' ? 'selected' : ''; ?>>Joglo</option>
+            <option value="Semua"   <?= $lokasi === 'Semua' ? 'selected' : ''; ?>>Semua</option>
+          </select>
 
-        <button class="btn btn-primary">🔍 Cari</button>
-      </form>
+          <button class="btn btn-primary" type="submit">🔍 Cari</button>
+        </form>
+      </div>
+    </nav>
+    
 
-    </div>
-</nav>
-
-<h4 class="fw-bold mb-2">📋 Jadwal Hari Ini</h4>
-
-<div class="card shadow mb-4">
-  <div class="card-header bg-primary text-white">
-    Jadwal Lokasi: <?= htmlspecialchars($lokasi) ?>
+<!-- Content -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold">📋 Jadwal Hari Ini</h2>
   </div>
-  <div class="card-body">
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover">
-        <thead class="table-dark text-center">
-          <tr>
-            <th>Nama Petugas</th>
-            <th>Tanggal</th>
-            <th>Shift</th>
-            <th>Jam</th>
-            <th>Lokasi</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php
-          if ($result && $result->num_rows > 0) {
-              while ($r = $result->fetch_assoc()) {
-                  echo "<tr>
-                        <td>{$r['nama']}</td>
-                        <td>{$r['tanggal']}</td>
-                        <td>{$r['shift']}</td>
-                        <td>{$r['jam']}</td>
-                        <td>{$r['lokasi']}</td>
-                    </tr>";
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        Jadwal Lokasi: <?= htmlspecialchars($lokasi, ENT_QUOTES, 'UTF-8') ?>
+      </div>
+      <div class="card-body">
+        <?php if ($queryError): ?>
+          <div class="alert alert-warning">Terjadi kesalahan mengambil data. Silakan cek log server.</div>
+        <?php endif; ?>
+
+        <?php if ($search !== '' && !$queryError): ?>
+          <div class="alert alert-info mb-3">
+            Hasil pencarian untuk: <strong><?= htmlspecialchars($search, ENT_QUOTES, 'UTF-8') ?></strong>
+            (<?= $result ? $result->num_rows : 0 ?> data ditemukan)
+          </div>
+        <?php endif; ?>
+
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle" id="scheduleTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Nama Petugas</th>
+                <th>Tanggal</th>
+                <th>Shift</th>
+                <th>Jam</th>
+                <th>Lokasi</th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+              if ($result && $result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      $shiftVal = $row['shift'] ?? '';
+                      $fileHTML = "-";
+                      if (!empty($row['file_path'])) {
+                          $filename = basename(str_replace('\\', '/', $row['file_path']));
+                          $fileUrl = "uploads/" . $filename;
+                          $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>Lihat File</a>";
+                      }
+                      echo "<tr>".
+                           "<td>".highlight_terms($row['nama'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['tanggal'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($shiftVal, $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['jam'] ?? '', $searchTerms)."</td>".
+                           "<td>".highlight_terms($row['lokasi'] ?? '', $searchTerms)."</td>".
+                           "</tr>";
+                  }
+              } else {
+                  echo "<tr><td colspan='8' class='text-center'>⚠️ Tidak ada data</td></tr>";
               }
-          } else {
-              echo "<tr><td colspan='5' class='text-center'>Tidak ada data</td></tr>";
-          }
-        ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+?>
+            </tbody>
+          </table>
+        </div>
+        <!-- Tabel Liputan -->
+         <?php if ($loggedIn): ?>
+            <div class="mb-3">
+                <a href="./pages/tambah_liputan.php" class="btn btn-success">➕ Tambah Kegiatan</a>
+            </div>
+          <?php endif; ?>
 
-<div class="card shadow">
-  <div class="card-header bg-secondary text-white">📁 Jadwal Liputan</div>
-  <div class="card-body">
+        </div>
+         <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle" id="scheduleTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Nama Petugas</th>
+                <th>Lokasi</th>
+                <th>Jenis Kegiatan</th>
+                <th>Tanggal</th>
+                <th>Surat Tugas</th>
+              </tr>
+            </thead>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover">
-        <thead class="table-dark text-center">
-          <tr>
-            <th>Nama Petugas</th>
-            <th>Lokasi</th>
-            <th>Jenis</th>
-            <th>Tanggal</th>
-            <th>Surat</th>
-          </tr>
-        </thead>
+            <tbody>
+            <?php
+                include './config/koneksi.php';
 
-        <tbody>
-        <?php
-            include './config/koneksi.php';
-            $lip = $conn->query("SELECT p.nama, l.* FROM liputan l JOIN pegawai p ON l.id_pegawai=p.id ORDER BY l.id DESC");
+                // Ambil data dari tabel liputan
+                $result = $conn->query("
+                                          SELECT 
+                                              p.nama AS nama_petugas,
+                                              l.lokasi,
+                                              l.jenis_kegiatan,
+                                              l.tanggal,
+                                              l.surat_tugas
+                                          FROM liputan l
+                                          JOIN pegawai p ON l.id_pegawai = p.id
+                                          ORDER BY l.id DESC
+                                        ");
 
-            if ($lip && $lip->num_rows > 0) {
-                while ($row = $lip->fetch_assoc()) {
-                    $file = $row['surat_tugas'] ? "<a href='uploads/".basename($row['surat_tugas'])."' target='_blank' class='btn btn-sm btn-outline-info'>📄</a>" : "-";
-                    echo "<tr>
-                            <td>{$row['nama']}</td>
-                            <td>{$row['lokasi']}</td>
-                            <td>{$row['jenis_kegiatan']}</td>
-                            <td>{$row['tanggal']}</td>
-                            <td class='text-center'>$file</td>
-                          </tr>";
+
+                if ($result && $result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+
+                        // Siapkan tombol file (jika ada surat tugas)
+                        $fileHTML = "-";
+                        if (!empty($row['surat_tugas'])) {
+                            // Ambil nama file dari path
+                            $filename = basename(str_replace('\\', '/', $row['surat_tugas']));
+                            // Path relatif (karena file disimpan di ../uploads)
+                            $fileUrl = "uploads/" . $filename;
+                            $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>📄 Lihat</a>";
+                        }
+
+                        echo "<tr>
+                                <td>" . htmlspecialchars($row['nama_petugas']) . "</td>
+                                <td>" . htmlspecialchars($row['lokasi']) . "</td>
+                                <td>" . htmlspecialchars($row['jenis_kegiatan']) . "</td>
+                                <td>" . htmlspecialchars($row['tanggal']) . "</td>
+                                <td>" . $fileHTML . "</td>
+                              </tr>";
+
+                    }
+                } else {
+                    echo "<tr><td colspan='4' class='text-center'>⚠️ Tidak ada data liputan</td></tr>";
                 }
-            } else echo "<tr><td colspan='5' class='text-center'>Tidak ada data</td></tr>";
-        ?>
-        </tbody>
-      </table>
+
+                $conn->close();
+                ?>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  </main>
 
-</main>
-
-<script src="assets/js/script.js"></script>
-
+  <script src="assets/js/script.js"></script>
+  
 </body>
 </html>
-
