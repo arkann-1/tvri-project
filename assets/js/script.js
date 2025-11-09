@@ -6,16 +6,18 @@ const sidebar = document.getElementById("sidebar");
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const scheduleTable = document.getElementById("scheduleTable");
+const toggleSidebar = document.getElementById("toggleSidebar");
 let currentHighlight = null;
 
 // ======================================
-// Sidebar Toggle 📌
+// Sidebar Toggle Desktop 📌
 // ======================================
 if (pinBtn && sidebar) {
     pinBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         sidebar.classList.toggle("collapsed");
-        pinBtn.classList.toggle("active");
+        const main = document.querySelector(".main");
+        if (main) main.classList.toggle("collapsed");
     });
 }
 
@@ -30,10 +32,10 @@ function clearHighlight() {
 }
 
 // ======================================
-// Search Functionality
+// Search Functionality 🔍
 // ======================================
 function doSearch() {
-    const q = searchInput.value.trim().toLowerCase();
+    const q = (searchInput?.value || '').trim().toLowerCase();
     clearHighlight();
     if (!q) return;
 
@@ -53,17 +55,20 @@ function doSearch() {
     }
 
     if (foundRow) {
-        const nameCell = foundRow.cells[1];
+        // highlight first visible cell (nama)
+        const nameCell = foundRow.cells[0] || foundRow.cells[1] || null;
         if (nameCell) {
             nameCell.classList.add("highlight");
             currentHighlight = nameCell;
         }
         foundRow.scrollIntoView({ behavior: "smooth", block: "center" });
     } else {
-        searchInput.focus();
-        searchInput.style.transition = "box-shadow .18s";
-        searchInput.style.boxShadow = "0 0 0 3px rgba(255,200,0,0.15)";
-        setTimeout(() => searchInput.style.boxShadow = "", 500);
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.style.transition = "box-shadow .18s";
+            searchInput.style.boxShadow = "0 0 0 3px rgba(255,200,0,0.25)";
+            setTimeout(() => { if (searchInput) searchInput.style.boxShadow = ""; }, 500);
+        }
     }
 }
 
@@ -138,8 +143,52 @@ function loadTableData() {
 }
 
 // ======================================
-// Initialize
+// Mobile Sidebar Toggle 📱 (CORRECTED)
+// ======================================
+function setupMobileSidebar() {
+    if (!toggleSidebar || !sidebar) return;
+
+    // Pastikan toggle punya z-index lebih rendah daripada sidebar oleh CSS.
+    // Di sini hanya toggle kelas active pada sidebar dan body (no-scroll).
+    toggleSidebar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const wasActive = sidebar.classList.contains("active");
+
+        if (wasActive) {
+            sidebar.classList.remove("active");
+            document.body.classList.remove("no-scroll");
+        } else {
+            sidebar.classList.add("active");
+            document.body.classList.add("no-scroll");
+        }
+    });
+
+    // Klik area luar sidebar untuk menutup (UX)
+    document.addEventListener("click", (e) => {
+        if (
+            window.innerWidth <= 768 &&
+            sidebar.classList.contains("active") &&
+            !sidebar.contains(e.target) &&
+            !e.target.closest("#toggleSidebar")
+        ) {
+            sidebar.classList.remove("active");
+            document.body.classList.remove("no-scroll");
+        }
+    });
+
+    // Tutup sidebar jika resize ke desktop
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove("active");
+            document.body.classList.remove("no-scroll");
+        }
+    });
+}
+
+// ======================================
+// Initialize All
 // ======================================
 document.addEventListener("DOMContentLoaded", () => {
     loadTableData();
+    setupMobileSidebar();
 });
