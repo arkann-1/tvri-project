@@ -1,5 +1,9 @@
 <?php
+
+session_start();
 include '../config/koneksi.php';
+$loggedIn = isset($_SESSION['user']);
+$role = $loggedIn ? $_SESSION['user']['role'] : null;
 
 $lokasi = isset($_GET['lokasi']) ? $_GET['lokasi'] : 'Senayan';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -83,8 +87,20 @@ function highlight_terms($text, $terms)
   <a href="../index.php">🏠 <span class="menu-text">Beranda</span></a>
   <a href="jadwalbulanan.php">📅 <span class="menu-text">Jadwal Bulanan</span></a>
   <a href="rekap.php">✉️ <span class="menu-text">Rekap</span></a>
-  <a href="tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</a>
-  <a href="tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</a>
+
+  <?php if ($loggedIn): ?>
+
+    <?php if ($role === 'admin'): ?>
+      <a href="tambahpegawai.php">➕ <span class="menu-text">Tambah Pegawai</span></a>
+      <a href="tambahjadwal_otomatis.php">➕ <span class="menu-text">Tambah Jadwal</span></a>
+    <?php endif; ?> 
+
+    <a href="../logout.php" class="text-danger">🚪 <span class="menu-text">Logout (<?= htmlspecialchars($_SESSION['user']['username']) ?>)</span></a>
+
+  <?php else: ?>
+
+      <a href="../login.php" class="text-success">🔑 <span class="menu-text">Login</span></a>
+  <?php endif; ?>
 </aside>
 
 <!-- Main -->
@@ -124,7 +140,6 @@ function highlight_terms($text, $terms)
           <th>Tanggal</th>
           <th>Jam</th>
           <th>Shift</th>
-          <th>File</th>
           <th>Lokasi</th>
           <th>Aksi</th>
         </tr>
@@ -144,12 +159,17 @@ function highlight_terms($text, $terms)
           <td><?= highlight_terms($row['tanggal'], $searchTerms) ?></td>
           <td><?= highlight_terms($row['jam'], $searchTerms) ?></td>
           <td><?= highlight_terms($row['shift'], $searchTerms) ?></td>
-          <td><?= $fileHTML ?></td>
           <td><?= highlight_terms($row['lokasi'], $searchTerms) ?></td>
-          <td>
-            <a href="editjadwal.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">✏️ Edit</a>
-            <a href="hapusjadwal.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">🗑️ Hapus</a>
+          
+         <td>
+              <?php if ($loggedIn && $role === 'admin'): ?>
+                  <a href="editjadwal.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">✏️ Edit</a>
+                  <a href="hapusjadwal.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">🗑️ Hapus</a>
+              <?php else: ?>
+                  -
+              <?php endif; ?>
           </td>
+
         </tr>
         <?php endwhile;
         else: ?>

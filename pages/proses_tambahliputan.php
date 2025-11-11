@@ -70,8 +70,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     }
 
-    if ($stmt->execute()) {
-        echo "<script>alert('✅ Data liputan berhasil disimpan.');window.location='../index.php';</script>";
+   if ($stmt->execute()) {
+
+        // ==== Kirim notifikasi ke Telegram ====
+        $botToken = "8199095361:AAEV0Ftgqr2IfkJ8-X9YAl_SGLBRK_jkEbM"; // Ganti dengan token bot kamu
+        $chatId   = "5181772967"; // Ganti dengan chat ID tujuan
+
+        // Jika ada file surat tugas, buat link publik
+        $baseUrl = "https://jadwaldinastransmisi.my.id"; // Ganti dengan URL websitemu, tanpa slash di akhir
+        $linkSurat = ($surat_tugas) ? $baseUrl . str_replace('..', '', $surat_tugas) : null;
+
+        // Format pesan
+        $pesan  = "📢 *Liputan Baru Ditambahkan*\n\n";
+        $pesan .= "👤 Petugas: *{$nama_petugas}*\n";
+        $pesan .= "📅 Tanggal: *{$tanggal}*\n";
+        $pesan .= "📍 Lokasi: *{$lokasi}*\n";
+        $pesan .= "📝 Kegiatan: *{$jenis_kegiatan}*\n";
+        if ($linkSurat) {
+            $pesan .= "📄 [Lihat Surat Tugas]($linkSurat)";
+        }
+
+        $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+        $data = [
+            'chat_id' => $chatId,
+            'text' => $pesan,
+            'parse_mode' => 'Markdown'
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_exec($ch);
+        curl_close($ch);
+
+        echo "<script>alert('✅ Data liputan berhasil disimpan dan notifikasi terkirim.');window.location='../index.php';</script>";
     } else {
         echo "<script>alert('❌ Gagal menyimpan data: " . $stmt->error . "');history.back();</script>";
     }
