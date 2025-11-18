@@ -2,10 +2,11 @@
 include '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_pegawai     = intval($_POST['id_pegawai']);
-    $tanggal        = $conn->real_escape_string($_POST['tanggal']);
-    $lokasi         = $conn->real_escape_string($_POST['lokasi']);
-    $jenis_kegiatan = $conn->real_escape_string($_POST['jenis_kegiatan']);
+    $id_pegawai      = intval($_POST['id_pegawai']);
+    $lokasi          = $conn->real_escape_string($_POST['lokasi']);
+    $jenis_kegiatan  = $conn->real_escape_string($_POST['jenis_kegiatan']);
+    $tanggal_mulai   = $conn->real_escape_string($_POST['tanggal_mulai']);
+    $tanggal_selesai = $conn->real_escape_string($_POST['tanggal_selesai']);
 
     // ==== Ambil nama pegawai dari tabel pegawai ====
     $result = $conn->query("SELECT nama FROM pegawai WHERE id = $id_pegawai LIMIT 1");
@@ -53,43 +54,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ==== Simpan data ke database ====
     if ($surat_tugas === null) {
-        // Jika tidak ada file, masukkan NULL untuk kolom surat_tugas
+        // Jika tidak ada file
         $stmt = $conn->prepare("
-            INSERT INTO liputan (tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
-            VALUES (?, ?, ?, NULL, ?)
+            INSERT INTO liputan (tanggal_mulai, tanggal_selesai, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
+            VALUES (?, ?, ?, ?, ?, NULL, ?)
         ");
-        $stmt->bind_param("sssi", $tanggal, $lokasi, $jenis_kegiatan, $id_pegawai);
+        $stmt->bind_param("ssssi", $tanggal_mulai, $tanggal_selesai, $lokasi, $jenis_kegiatan, $id_pegawai);
 
     } else {
-        // Jika ada file, masukkan path-nya
+        // Jika ada file
         $stmt = $conn->prepare("
-            INSERT INTO liputan (tanggal, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO liputan (tanggal_mulai, tanggal_selesai, lokasi, jenis_kegiatan, surat_tugas, id_pegawai)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("ssssi", $tanggal, $lokasi, $jenis_kegiatan, $surat_tugas, $id_pegawai);
-
+        // ❗️Perbaikan di sini: "ssssssi" tanpa spasi
+        $stmt->bind_param("sssssi", $tanggal_mulai, $tanggal_selesai, $lokasi, $jenis_kegiatan, $surat_tugas, $id_pegawai);
     }
 
-   if ($stmt->execute()) {
-
+    if ($stmt->execute()) {
         // ==== Kirim notifikasi ke Telegram ====
-        $botToken = "8199095361:AAEV0Ftgqr2IfkJ8-X9YAl_SGLBRK_jkEbM"; // Ganti dengan token bot kamu
-        $chatId   = "5181772967"; // Ganti dengan chat ID tujuan
+        $botToken = "8199095361:AAEV0Ftgqr2IfkJ8-X9YAl_SGLBRK_jkEbM";
+        $chatId   = "5181772967";
 
         // Jika ada file surat tugas, buat link publik
-        $baseUrl = "https://jadwaldinastransmisi.my.id"; // Ganti dengan URL websitemu, tanpa slash di akhir
-        $linkSurat = ($surat_tugas) ? $baseUrl . str_replace('..', '', $surat_tugas) : null;
+        $baseUrl = "https://jadwaldinastransmisi.my.id";
+        $linkSurat = $baseUrl;
 
         // Format pesan
         $pesan  = "📢 *Liputan Baru Ditambahkan*\n\n";
         $pesan .= "👤 Petugas: *{$nama_petugas}*\n";
-        $pesan .= "📅 Tanggal: *{$tanggal}*\n";
+        $pesan .= "📅 Tanggal: *{$tanggal_mulai}* s/d *{$tanggal_selesai}*\n";
         $pesan .= "📍 Lokasi: *{$lokasi}*\n";
         $pesan .= "📝 Kegiatan: *{$jenis_kegiatan}*\n";
         if ($linkSurat) {
-            $pesan .= "📄 [Lihat Surat Tugas]($linkSurat)";
+            $pesan .= "\n📄 [Lihat Surat Tugas]($linkSurat)";
         }
 
+        // Kirim ke Telegram
         $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
         $data = [
             'chat_id' => $chatId,

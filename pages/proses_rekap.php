@@ -27,7 +27,7 @@ $sql = "
         $whereLokasi
     LEFT JOIN liputan l 
         ON p.id = l.id_pegawai 
-        AND DATE_FORMAT(l.tanggal, '%Y-%m') = '$bulan'
+        AND DATE_FORMAT(l.tanggal_mulai, '%Y-%m') = '$bulan'
     GROUP BY p.id
     HAVING total_hari_kerja > 0
     ORDER BY p.nama ASC

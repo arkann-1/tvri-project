@@ -20,10 +20,14 @@ LEFT JOIN jadwal_karyawan jk
     AND DATE_FORMAT(jk.tanggal, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
 LEFT JOIN liputan l 
     ON p.id = l.id_pegawai 
-    AND DATE_FORMAT(l.tanggal, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+    AND (
+        DATE_FORMAT(l.tanggal_mulai, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+        OR DATE_FORMAT(l.tanggal_selesai, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+    )
 GROUP BY p.id, jk.lokasi
 ORDER BY p.nama ASC, jk.lokasi ASC
 ";
+
 
 $result = $conn->query($query);
 
@@ -55,15 +59,18 @@ if ($result && $result->num_rows > 0) {
         $idPegawai = $data['id_pegawai'];
         $lokasiJadwal = $data['lokasi'] !== '-' ? $data['lokasi'] : null;
 
-        // Ambil semua liputan (semua lokasi)
         $liputanQuery = "
             SELECT jenis_kegiatan, lokasi 
             FROM liputan 
             WHERE id_pegawai = $idPegawai
-              AND DATE_FORMAT(tanggal, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+            AND (
+                    DATE_FORMAT(tanggal_mulai, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+                OR DATE_FORMAT(tanggal_selesai, '%Y-%m') = '".$conn->real_escape_string($bulan)."'
+            )
         ";
         $liputanResult = $conn->query($liputanQuery);
         $namaLiputan = [];
+
 
         while ($lp = $liputanResult->fetch_assoc()) {
             $lokLip = $lp['lokasi'] ?: '-';

@@ -26,11 +26,11 @@ if ($search !== '') {
 
 // Kondisi WHERE
 $where = [];
-$where[] = "tanggal = CURDATE()"; // selalu jadwal hari ini
+$where[] = "jk.tanggal = CURDATE()"; // selalu jadwal hari ini
 
 if ($lokasi !== 'Semua') {
     $lokasiEsc = $conn->real_escape_string($lokasi);
-    $where[] = "lokasi = '{$lokasiEsc}'";
+    $where[] = "jk.lokasi = '{$lokasiEsc}'";
 }
 
 if (!empty($searchTerms)) {
@@ -47,9 +47,15 @@ if (!empty($searchTerms)) {
 }
 
 // Susun query akhir
-$sql = "SELECT jk.*, p.nama 
+$sql = "SELECT jk.*, p.nama,
+        IF(l.id_pegawai IS NOT NULL, 'Dinas Luar', '') AS status_luar
         FROM jadwal_karyawan jk
-        LEFT JOIN pegawai p ON jk.id_pegawai = p.id";
+        LEFT JOIN pegawai p ON jk.id_pegawai = p.id
+        LEFT JOIN liputan l 
+           ON l.id_pegawai = jk.id_pegawai 
+          AND jk.tanggal BETWEEN l.tanggal_mulai AND l.tanggal_selesai";
+
+
 if (!empty($where)) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
@@ -189,6 +195,7 @@ function highlight_terms($text, $terms)
                 <th>Shift</th>
                 <th>Jam</th>
                 <th>Lokasi</th>
+                <th>Keterangan</th>
               </tr>
             </thead>
             <tbody>
@@ -196,11 +203,12 @@ function highlight_terms($text, $terms)
               if ($result && $result->num_rows > 0) {
                   while ($row = $result->fetch_assoc()) {
                       echo "<tr>" .
-                           "<td>" . highlight_terms($row['nama'] ?? '', $searchTerms) . "</td>" .
-                           "<td>" . highlight_terms($row['tanggal'] ?? '', $searchTerms) . "</td>" .
-                           "<td>" . highlight_terms($row['shift'] ?? '', $searchTerms) . "</td>" .
-                           "<td>" . highlight_terms($row['jam'] ?? '', $searchTerms) . "</td>" .
-                           "<td>" . highlight_terms($row['lokasi'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . highlight_terms($row['nama'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . highlight_terms($row['tanggal'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . highlight_terms($row['shift'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . highlight_terms($row['jam'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . highlight_terms($row['lokasi'] ?? '', $searchTerms) . "</td>" .
+                            "<td>" . (!empty($row['status_luar']) ? '<span class=\"badge bg-warning text-dark\">Dinas Luar</span>' : '') . "</td>" .
                            "</tr>";
                   }
               } else {
@@ -225,40 +233,82 @@ function highlight_terms($text, $terms)
                 <th>Nama Petugas</th>
                 <th>Lokasi</th>
                 <th>Jenis Kegiatan</th>
-                <th>Tanggal</th>
+                <th>Tanggal Mulai</th>
+                <th>Tanggal Selesai</th>
                 <th>Surat Tugas</th>
+                <th>Bukti Liputan</th>
               </tr>
             </thead>
             <tbody>
             <?php
-  $resultLiputan = $conn->query("
-                SELECT p.nama AS nama_petugas, l.lokasi, l.jenis_kegiatan, l.tanggal, l.surat_tugas
-                FROM liputan l
-                JOIN pegawai p ON l.id_pegawai = p.id
-                ORDER BY l.id DESC
-              ");
+$resultLiputan = $conn->query("
+    SELECT l.id, p.nama AS nama_petugas, l.lokasi, l.jenis_kegiatan, l.tanggal_mulai, l.tanggal_selesai,
+           l.surat_tugas, l.bukti_liputan, l.id_pegawai
+    FROM liputan l
+    JOIN pegawai p ON l.id_pegawai = p.id
+    ORDER BY l.id DESC
+");
+
 if ($resultLiputan && $resultLiputan->num_rows > 0) {
     while ($row = $resultLiputan->fetch_assoc()) {
-        $fileHTML = "-";
+
+        // Inisialisasi default agar tidak undefined
+        $fileSurat = "-";
+        $fileBukti = "-";
+
+        // Ambil id liputan
+        $idLiputan = intval($row['id']);
+
+        // Siapkan nilai yang aman untuk ditampilkan
+        $namaPetugas       = htmlspecialchars($row['nama_petugas'] ?? '-', ENT_QUOTES, 'UTF-8');
+        $lokasi            = htmlspecialchars($row['lokasi'] ?? '-', ENT_QUOTES, 'UTF-8');
+        $jenis             = htmlspecialchars($row['jenis_kegiatan'] ?? '-', ENT_QUOTES, 'UTF-8');
+        $tanggal_mulai     = htmlspecialchars($row['tanggal_mulai'] ?? '-', ENT_QUOTES, 'UTF-8');
+        $tanggal_selesai   = htmlspecialchars($row['tanggal_selesai'] ?? '-', ENT_QUOTES, 'UTF-8'); 
+
+        // Surat tugas (jika ada) -> buat link relatif ke folder uploads/
         if (!empty($row['surat_tugas'])) {
-            $filename = basename(str_replace('\\', '/', $row['surat_tugas']));
-            $fileUrl = "uploads/" . $filename;
-            $fileHTML = "<a href='" . htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>📄 Lihat</a>";
+            $suratBasename = basename(str_replace('\\', '/', $row['surat_tugas']));
+            $suratUrl = "uploads/" . $suratBasename; // sesuaikan jika struktur berbeda
+            $fileSurat = "<a href='" . htmlspecialchars($suratUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-outline-info'>📄 Lihat</a>";
         }
+
+        // Bukti liputan (jika ada) -> link ke uploads/bukti/
+        if (!empty($row['bukti_liputan'])) {
+            $buktiBasename = basename(str_replace('\\', '/', $row['bukti_liputan']));
+            $buktiUrl = "uploads/bukti/" . $buktiBasename; // sesuaikan jika diperlukan
+            $fileBukti = "<a href='" . htmlspecialchars($buktiUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' class='btn btn-sm btn-success'>✅ Lihat Bukti</a>";
+        } else {
+            // Tampilkan tombol upload hanya jika login sebagai petugas yang ditugaskan
+            if (isset($_SESSION['user'])
+                && $_SESSION['user']['role'] === 'petugas'
+                && intval($_SESSION['user']['id']) === intval($row['id_pegawai'])) {
+
+                $fileBukti = "<a href='pages/upload_bukti.php?id={$idLiputan}' class='btn btn-sm btn-warning'>📤 Upload Bukti</a>";
+            } elseif (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
+                // Untuk admin kita bisa tampilkan tombol placeholder atau teks
+                $fileBukti = "<span class='text-muted'>Belum ada</span>";
+            }
+        }
+
         echo "<tr>
-                              <td>" . htmlspecialchars($row['nama_petugas']) . "</td>
-                              <td>" . htmlspecialchars($row['lokasi']) . "</td>
-                              <td>" . htmlspecialchars($row['jenis_kegiatan']) . "</td>
-                              <td>" . htmlspecialchars($row['tanggal']) . "</td>
-                              <td>" . $fileHTML . "</td>
-                            </tr>";
+                <td>{$namaPetugas}</td>
+                <td>{$lokasi}</td>
+                <td>{$jenis}</td>
+                <td>{$tanggal_mulai}</td>
+                <td>{$tanggal_selesai}</td>
+                <td>{$fileSurat}</td>
+                <td>{$fileBukti}</td>
+              </tr>";
     }
 } else {
-    echo "<tr><td colspan='5' class='text-center'>⚠️ Tidak ada data liputan</td></tr>";
+    echo "<tr><td colspan='6' class='text-center'>⚠️ Tidak ada data liputan</td></tr>";
 }
 
-$conn->close();
+// jangan tutup koneksi di tengah jika masih butuh $conn setelah ini
+// $conn->close();
 ?>
+
             </tbody>
           </table>
         </div>
