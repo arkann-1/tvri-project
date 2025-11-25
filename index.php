@@ -55,13 +55,15 @@ $sql = "SELECT jk.*, p.nama,
            ON l.id_pegawai = jk.id_pegawai 
           AND jk.tanggal BETWEEN l.tanggal_mulai AND l.tanggal_selesai";
 
-
 if (!empty($where)) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
-$sql .= " ORDER BY p.nama ASC";
+
+// urutkan berdasarkan shift, lalu nama jika diperlukan
+$sql .= " ORDER BY jk.shift ASC, p.nama ASC";
 
 $result = $conn->query($sql);
+
 
 // Fungsi highlight
 function highlight_terms($text, $terms)
@@ -167,6 +169,7 @@ function highlight_terms($text, $terms)
     
     <!-- Content -->
     <div class="d-flex justify-content-between align-items-center mb-3">
+      <i class="bi bi-0-circle"></i>
       <h2 class="fw-bold">📋 Jadwal Hari Ini</h2>
     </div>
 
