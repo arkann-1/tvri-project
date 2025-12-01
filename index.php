@@ -244,13 +244,16 @@ function highlight_terms($text, $terms)
             </thead>
             <tbody>
             <?php
-$resultLiputan = $conn->query("
-    SELECT l.id, p.nama AS nama_petugas, l.lokasi, l.jenis_kegiatan, l.tanggal_mulai, l.tanggal_selesai,
-           l.surat_tugas, l.bukti_liputan, l.id_pegawai
-    FROM liputan l
-    JOIN pegawai p ON l.id_pegawai = p.id
-    ORDER BY l.id DESC
-");
+                  $resultLiputan = $conn->query("
+                      SELECT l.id, p.nama AS nama_petugas, l.lokasi, l.jenis_kegiatan, 
+                            l.tanggal_mulai, l.tanggal_selesai,
+                            l.surat_tugas, l.bukti_liputan, l.id_pegawai
+                      FROM liputan l
+                      JOIN pegawai p ON l.id_pegawai = p.id
+                      WHERE MONTH(l.tanggal_mulai) = MONTH(CURDATE())
+                        AND YEAR(l.tanggal_mulai) = YEAR(CURDATE())
+                      ORDER BY l.id DESC
+                  ");
 
 if ($resultLiputan && $resultLiputan->num_rows > 0) {
     while ($row = $resultLiputan->fetch_assoc()) {

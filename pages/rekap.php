@@ -14,25 +14,37 @@ include '../config/koneksi.php';
     <h3 class="mb-4 text-center">📋 Rekap Jadwal Pegawai</h3>
 
     <form method="GET" class="row g-3 mb-4">
-        <div class="col-md-3">
-            <label for="bulan" class="form-label">Bulan</label>
-            <input type="month" id="bulan" name="bulan" class="form-control"
-                   value="<?= htmlspecialchars($_GET['bulan'] ?? date('Y-m')) ?>">
-        </div>
+
+    <!-- Bulan -->
+    <div class="col-md-3">
+        <label for="bulan" class="form-label">Bulan</label>
+        <input type="month" id="bulan" name="bulan" class="form-control"
+               value="<?= htmlspecialchars($_GET['bulan'] ?? date('Y-m')) ?>">
+    </div>
+
+    <!-- Lokasi -->
+    <div class="col-md-3">
+        <label for="lokasi" class="form-label">Lokasi</label>
         <select id="lokasi" name="lokasi" class="form-select">
             <option value="Semua" <?= ($lokasi ?? '') == 'Semua' ? 'selected' : '' ?>>Semua Lokasi</option>
             <option value="Senayan" <?= ($lokasi ?? '') == 'Senayan' ? 'selected' : '' ?>>Senayan</option>
             <option value="Joglo" <?= ($lokasi ?? '') == 'Joglo' ? 'selected' : '' ?>>Joglo</option>
         </select>
+    </div>
 
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Tampilkan</button>
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-            <a href="export_rekap.php?bulan=<?= urlencode($_GET['bulan'] ?? date('Y-m')) ?>&lokasi=<?= urlencode($_GET['lokasi'] ?? 'Senayan') ?>"
-               class="btn btn-success w-100">📊 Export ke Excel</a>
-        </div>
-    </form>
+    <!-- Tombol Tampilkan -->
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Tampilkan</button>
+    </div>
+
+    <!-- Export Excel -->
+    <div class="col-md-3 d-flex align-items-end">
+        <a href="export_rekap.php?bulan=<?= urlencode($_GET['bulan'] ?? date('Y-m')) ?>&lokasi=<?= urlencode($_GET['lokasi'] ?? 'Senayan') ?>"
+           class="btn btn-success w-100">📊 Export ke Excel</a>
+    </div>
+
+</form>
+
 
     <div class="card shadow-sm">
         <div class="card-body">
